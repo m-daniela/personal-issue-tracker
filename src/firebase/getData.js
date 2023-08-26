@@ -1,5 +1,5 @@
 import db from "@/firebase/config";
-import { dbCollectionNames } from "@/utils/dbConstants";
+import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, getDoc, collection, query, getDocs, orderBy } from "firebase/firestore";
 
 
@@ -150,9 +150,7 @@ export const getTask = async (projectId, categoryId, taskId) => {
         };
         return task;
     } else {
-        return {
-            error: "The task does not exist"
-        };
+        return errorMessageBuilder("The task does not exist");
     }
 };
 

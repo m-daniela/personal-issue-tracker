@@ -1,5 +1,5 @@
 import db from "@/firebase/config";
-import { dbCollectionNames, defaultCategories } from "@/utils/dbConstants";
+import { dbCollectionNames, defaultCategories, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, addDoc, collection, Timestamp, writeBatch, setDoc } from "firebase/firestore"; 
 import { categoryExists, projectExists } from "./getData";
 
@@ -55,14 +55,10 @@ export const addTask = async (projectId, categoryId, taskData) => {
     const isProject = await projectExists(projectId);
     const isCategory = await categoryExists(projectId, categoryId);
     if (!isProject){
-        return {
-            error: "The project does not exist"
-        };
+        return errorMessageBuilder("The project does not exist");
     }
     if (!isCategory){
-        return {
-            error: "The category does not exist"
-        };
+        return errorMessageBuilder("The category does not exist");
     }
     if (!taskData.id) {
         const taskDataWithTimestamps = {
