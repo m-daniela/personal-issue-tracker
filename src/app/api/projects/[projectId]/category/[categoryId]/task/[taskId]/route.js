@@ -1,3 +1,4 @@
+import { deleteTask } from "@/firebase/deleteData";
 import { getTask } from "@/firebase/getData";
 import { updateTask, updateTaskCategory } from "@/firebase/updateData";
 import { NextResponse } from "next/server";
@@ -26,4 +27,13 @@ export async function PUT(request, {params}) {
         newTaskData = await updateTask(projectId, categoryId, taskId, taskData);
     }
     return NextResponse.json(newTaskData);
+
+}
+
+export async function DELETE(request, {params}) {
+    const projectId = params.projectId;
+    const categoryId = params.categoryId;
+    const taskId = params.taskId;
+    const deletedTaskData = await deleteTask(projectId, categoryId, taskId);
+    return NextResponse.json(deletedTaskData);
 }

@@ -15,6 +15,9 @@
     - [updateProject](#updateproject)
     - [updateTask](#updatetask)
     - [updateTaskCategory](#updatetaskcategory)
+  - [Delete data](#delete-data)
+    - [deleteProject](#deleteproject)
+    - [deleteTask](#deletetask)
 
 
 ## Data format
@@ -338,4 +341,66 @@ If the task and destination category are found, the task will be added to the ca
 
 This endpoint is the same as the one for [updateTask](#updatetask), but the request body is different. 
 
-Endpoint: `PUT projects/[projectId]/category/[categoryId]/task`
+Endpoint: `PUT projects/[projectId]/category/[categoryId]/task/[taskId]`
+
+```json
+// request body
+{
+    "categoryIdTo": "4n3uAsNXHUOHOwJPdHit"
+}
+
+// response body
+{
+    "id": "pDcCfqSmhoE2SVe9ai7z",
+    "updated_at": {
+        "seconds": 1693059613,
+        "nanoseconds": 297000000
+    },
+    "created_at": {
+        "seconds": 1693056186,
+        "nanoseconds": 561000000
+    },
+    "labels": [
+        "label 1"
+    ],
+    "name": "task update",
+    "description": "this is a test task",
+    "notes": "some notes"
+}
+```
+
+## Delete data
+
+### deleteProject
+
+`deleteProject(projectId)`
+
+Delete the given project. This function will automatically delete all the tasks and categories associated with the project.
+
+Returns the id of the deleted project. 
+
+Endpoint: `DELETE /projects/[projectId]`
+
+```json
+{
+    "id": "ijZU2oU73w4xQonkEMdZ"
+}
+```
+
+
+### deleteTask
+
+`deleteTask(projectId, categoryId, taskId)`
+
+Delete the task from the given category and project. 
+
+Returns the id of the deleted task.
+
+Endpoint: `DELETE projects/[projectId]/category/[categoryId]/task/[taskId]`
+
+```json
+{
+    "id": "pDcCfqSmhoE2SVe9ai7z"
+}
+```
+
