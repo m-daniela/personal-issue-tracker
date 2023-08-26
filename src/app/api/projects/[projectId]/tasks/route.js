@@ -6,4 +6,3 @@ export async function GET(request, {params}) {
     const categoriesAndTasks = await getCategoriesAndTasks(projectId);
     return NextResponse.json(categoriesAndTasks);
 }
-

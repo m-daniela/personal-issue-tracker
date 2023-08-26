@@ -27,8 +27,6 @@ export const getProjects = async () => {
 };
 
 
-
-
 /**
  * Get categories and tasks
  * Get the categories and tasks that are associated
@@ -68,7 +66,9 @@ export const getCategoriesAndTasks = async (projectId) => {
 const getCategories = async (projectId) => {
     const categories = {};
     const categoryIds = {};
-    const q = query(collection(db, ...dbCollectionNames.getCategoriesPath(projectId)), orderBy("order_no"));
+    const q = query(collection(
+        db, ...dbCollectionNames.getCategoriesPath(projectId)), 
+    orderBy("order_no"));
 
     const snapshot = await getDocs(q);
 
@@ -106,7 +106,9 @@ export const getTasksByCategory = async (projectId, categories) => {
     const normalizedTasks = {};
     for (const categoryId in categories){
         const tasks = [];
-        const q = query(collection(db, ...dbCollectionNames.tasksPath(projectId, categoryId)), orderBy("created_at"));
+        const q = query(
+            collection(db, ...dbCollectionNames.tasksPath(
+                projectId, categoryId)), orderBy("created_at"));
         const snapshot = await getDocs(q);
 
         snapshot.forEach((document) => {
@@ -136,7 +138,8 @@ export const getTasksByCategory = async (projectId, categories) => {
  * @returns object with task data
  */
 export const getTask = async (projectId, categoryId, taskId) => {
-    const collectionPath = dbCollectionNames.taskPath(projectId, categoryId, taskId);
+    const collectionPath = dbCollectionNames.taskPath(
+        projectId, categoryId, taskId);
     const docRef = doc(db, ...collectionPath);
     const snapshot = await getDoc(docRef);
 
