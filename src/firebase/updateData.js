@@ -1,8 +1,9 @@
 import db from "@/firebase/config";
-import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
+import { dbCollectionNames } from "@/utils/dbConstants";
 import { doc, updateDoc, Timestamp } from "firebase/firestore";
-import { categoryExists, projectExists } from "./getData";
-
+import { categoryExists, getTask, projectExists } from "./getData";
+import { addTask } from "./addData";
+import { deleteTask } from "./deleteData";
 
 /**
  * Update the project
@@ -60,7 +61,7 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
     if (!isCategory){
         return errorMessageBuilder("The category does not exist");
     }
-    
+
     try{
         await updateDoc(task, taskDataToUpdate);
         return taskDataWithTimestamps;
@@ -82,6 +83,35 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
  * @returns 
  */
 export const updateTaskCategory = async (projectId, categoryIdFrom, categoryIdTo, taskId) => {
-    // TODO: this function needs to delete the task, update when
-    // TODO: the delete operations are added
+    const task = await getTask(projectId, categoryIdFrom, taskId);
+    const taskDataWithTimestamps = {
+        ...task, 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    const isProject = await projectExists(projectId);
+    const isCategoryFrom = await categoryExists(projectId, categoryIdFrom);
+    const isCategoryTo = await categoryExists(projectId, categoryIdTo);
+    if (!isProject){
+        return {
+            error: "The project does not exist"
+        };
+    }
+    if (!isCategoryFrom && !isCategoryTo){
+        return {
+            error: "The category does not exist"
+        };
+    }
+    try{
+        await addTask(projectId, categoryIdTo, taskDataWithTimestamps);
+        await deleteTask(projectId, categoryIdFrom, taskId);
+        return taskDataWithTimestamps;
+    }
+    catch (error){
+        return {
+            error: {
+                message: `Could not update task "${task.name}"`, 
+                reason: error.message
+            }
+        };
+    }
 };
