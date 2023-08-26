@@ -11,6 +11,10 @@
   - [Add data](#add-data)
     - [addProject](#addproject)
     - [addTask](#addtask)
+  - [Update data](#update-data)
+    - [updateProject](#updateproject)
+    - [updateTask](#updatetask)
+    - [updateTaskCategory](#updatetaskcategory)
 
 
 ## Data format
@@ -199,7 +203,7 @@ The default categories are also added automatically. These are `["todo", "in pro
 Add a new task. This function has two cases and only the request body differs:
 
 1. when a new task is added - a new id is created
-2. when a task is moved between categories - the task has an id and it is copied to the given category (more details in Update data)
+2. when a task is moved between categories - the task has an id and it is copied to the given category (more details in [Update data](#updatetaskcategory))
 
 Endpoint - same for both cases: `POST projects/[projectId]/category/[categoryId]/task`
 
@@ -231,3 +235,107 @@ Endpoint - same for both cases: `POST projects/[projectId]/category/[categoryId]
     }
 }
 ```
+
+## Update data
+
+### updateProject
+
+`updateProject(projectId, projectData)`
+
+Update the project with the given data. 
+
+Endpoint: `PUT projects/[projectId]`
+
+```json
+// request body
+{
+    "id": "ijZU2oU73w4xQonkEMdZ",
+    "name": "Test Project Update",
+    "created_at": {
+        "seconds": 1693040248,
+        "nanoseconds": 713000000
+    },
+    "updated_at": {
+        "seconds": 1693040248,
+        "nanoseconds": 713000000
+    }
+}
+
+// response body
+{
+    "id": "ijZU2oU73w4xQonkEMdZ",
+    "name": "Test Project Update",
+    "created_at": {
+        "seconds": 1693040248,
+        "nanoseconds": 713000000
+    },
+    "updated_at": {
+        "seconds": 1693055216,
+        "nanoseconds": 118000000
+    }
+}
+```
+
+
+### updateTask
+
+`updateTask(projectId, categoryId, taskId, taskData)`
+
+Update the task with the given data. 
+
+Endpoint: `PUT projects/[projectId]/category/[categoryId]/task`
+
+
+```json
+// request body
+{
+    "id": "pDcCfqSmhoE2SVe9ai7z",
+    "name": "task update",
+    "description": "this is a test task",
+    "notes": "some notes",
+    "labels": [
+        "label 1"
+    ],
+    "created_at": {
+        "seconds": 1693056186,
+        "nanoseconds": 561000000
+    },
+    "updated_at": {
+        "seconds": 1693056186,
+        "nanoseconds": 561000000
+    }
+}
+
+
+// response body
+{
+    "id": "pDcCfqSmhoE2SVe9ai7z",
+    "name": "task update",
+    "description": "this is a test task",
+    "notes": "some notes",
+    "labels": [
+        "label 1"
+    ],
+    "created_at": {
+        "seconds": 1693056186,
+        "nanoseconds": 561000000
+    },
+    "updated_at": {
+        "seconds": 1693056301,
+        "nanoseconds": 563000000
+    }
+}
+```
+
+
+### updateTaskCategory
+
+`updateTaskCategory(projectId, categoryIdFrom, categoryIdTo, taskId)`
+
+Move the task between categories. This is the second case presented in the [Add data](#addtask) section.
+
+If the task and destination category are found, the task will be added to the category and delete from the current category. 
+
+This endpoint is the same as the one for [updateTask](#updatetask), but the request body is different. 
+
+Endpoint: `PUT projects/[projectId]/category/[categoryId]/task`
