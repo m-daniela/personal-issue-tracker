@@ -1,10 +1,13 @@
 import React from "react";
 import PageHeader from "@/components/PageHeader";
 
-export default function Home() {
+
+const AddTaskPage = () => {
     return (
         <section>
-            <PageHeader title="Projects"/>
+            <PageHeader title="Add new task" />
         </section>
     );
-}
+};
+
+export default AddTaskPage;
