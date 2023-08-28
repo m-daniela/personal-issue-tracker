@@ -5,6 +5,7 @@ import { setProjects } from "@/redux/features/projectsSlice";
 import { store } from "@/redux/store";
 import { apiUrls } from "@/utils/generalConstants";
 import { Inter } from "next/font/google";
+import "../../styles/global.scss";
 
 const inter = Inter({ subsets: ["latin"] });
 

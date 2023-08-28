@@ -1,0 +1,90 @@
+@import "./utils.scss";
+@import "./forms.scss";
+@import "./projects.scss";
+
+:root {
+  --background-color: #f2f2f2;
+  --font-color: #191919;
+  --font-color-inverted: #e6e6e6;
+  --accent-color: #7600ad;
+  --accent-color-input: #e5e5e5;
+  --hover-accent-color: #460067;
+  --highlight: #cfcfcf;
+  --max-width: 1100px;
+  --border-radius: 5px;
+  --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
+      'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
+      'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
+}
+  
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #f2f2f2;
+    --font-color: #191919;
+    --font-color-inverted: #e6e6e6;
+    --accent-color: #7600ad;
+    --highlight: #cfcfcf;
+    --max-width: 1100px;
+    --border-radius: 5px;
+  }
+}
+  
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--font-color);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+nav{
+  background-color: var(--accent-color);
+  color: var(--font-color-inverted);
+  padding: 1em 1.5em;
+  a {
+    padding-right: 1em;
+  }
+}
+
+main {
+  max-width: var(--max-width);
+  margin: 2em auto;
+  section{
+    padding: 1em 0;
+    margin: 0 auto;
+  }
+}
+
+header {
+  width: 75%;
+  margin: 0 auto;
+  color: var(--accent-color);
+}
+
+ul {
+  list-style-type: none;
+}
+
+h2 {
+  font-size: 1.5em;
+}
+
+// @media (prefers-color-scheme: dark) {
+//   html {
+//     color-scheme: dark;
+//   }
+// }
