@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import ProjectsPreloader from "@/components/preloaders/ProjectsPreloader";
 import StoreProvider from "@/redux/StoreProvider";
+import SelectedProjectProvider from "@/components/context/SelectedProjectProvider";
 import { setProjects } from "@/redux/features/projectsSlice";
 import { store } from "@/redux/store";
 import { apiUrls } from "@/utils/generalConstants";
@@ -38,11 +39,13 @@ export default async function RootLayout({ children }) {
     return (
         <html lang="en">
             <body className={inter.className}>
-                <ProjectsPreloader data={projects}/>
-                <StoreProvider>
-                    <Navbar />
-                    <main>{children}</main>
-                </StoreProvider>
+                <SelectedProjectProvider>
+                    <ProjectsPreloader data={projects}/>
+                    <StoreProvider>
+                        <Navbar />
+                        <main>{children}</main>
+                    </StoreProvider>
+                </SelectedProjectProvider>
             </body>
         </html>
     );
