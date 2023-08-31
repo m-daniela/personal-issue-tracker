@@ -2,6 +2,9 @@ import React from "react";
 import PageHeader from "@/components/PageHeader";
 import AddTask from "@/components/tasks/AddTask";
 
+export const metadata = {
+    title: "Add a new task - Personal Issue Tracker"
+};
 
 const AddTaskPage = ({params}) => {
     const {projectId, categoryId} = params;

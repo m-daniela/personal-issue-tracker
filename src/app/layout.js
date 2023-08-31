@@ -10,11 +10,6 @@ import "../../styles/global.scss";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-    title: "Personal Jira",
-    description: "Jira, but better and free",
-};
-
 /**
  * Fetch and set the projects in the store.
  * This operation is done so they can be 
