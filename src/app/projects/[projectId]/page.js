@@ -5,12 +5,15 @@ import CategoriesPreloader from "@/components/preloaders/CategoriesPreloader";
 import PageHeader from "@/components/PageHeader";
 
 
+export const metadata = {
+    title: "Your project - Personal Issue Tracker"
+};
+
 const fetchCategoriesAndTasks = async (projectId) => {
     const response = await fetch(apiUrls.getCategoriesAndTasks(projectId), {cache: "no-store"});
     const tasks = await response.json();
     return tasks; 
 };
-
 
 const ProjectPage = async ({params}) => {
     const projectId = params.projectId;
