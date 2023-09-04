@@ -9,6 +9,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import SnackbarWrapper from "../SnackbarWrapper";
 
 
 /**
@@ -23,6 +24,11 @@ const ProjectItem = ({project}) => {
     const dispatch = useDispatch();
     const [updateOn, setUpdateOn] = useState(false);
     const [projectName, setProjectName] = useState(project.name);
+    const [open, setOpen] = useState(true);
+    const [message, setMessage] = useState({
+        text: "", 
+        isError: false
+    });
 
     const handleUpdateProject = (e) => {
         e.preventDefault();
@@ -37,7 +43,21 @@ const ProjectItem = ({project}) => {
                 method: "DELETE",
             });
         const deletedProjectId = await response.json();
-        dispatch(deleteProject(deletedProjectId));
+        if (deletedProjectId.error) {
+            setMessage({
+                text: `Error while deleting the project: ${deletedProjectId.error.message}`, 
+                isError: true
+            });
+            setOpen(true);
+        }
+        else{
+            setMessage({
+                text: "", 
+                isError: false
+            });
+            setOpen(false);
+            dispatch(deleteProject(deletedProjectId));
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -55,32 +75,57 @@ const ProjectItem = ({project}) => {
                 })
             });
         const updatedProject = await response.json();
-        dispatch(updateProject(updatedProject));
-        setUpdateOn(state => !state);
+        if (updatedProject.error) {
+            setMessage({
+                text: `Error while updating the project: ${updatedProject.error.message}`, 
+                isError: true
+            });
+            setOpen(true);
+        }
+        else{
+            setMessage({
+                text: "", 
+                isError: false
+            });
+            setOpen(false);
+            dispatch(updateProject(updatedProject));
+            setUpdateOn(state => !state);
+        }
+        
     };
     
     return (
-        <li className="project-item">
-            {
-                updateOn ? 
-                    <>
-                        <input 
-                            type="text" 
-                            value={projectName} 
-                            onChange={e => setProjectName(e.target.value)} />
-                        <button type="submit" onClick={handleSubmit}><DoneOutlinedIcon /></button>
-                        <button onClick={handleUpdateProject}><CloseOutlinedIcon /></button>
-                    </>
-                    :
-                    <>
-                        <Link href={routes.projectRoute(project.id)}>
-                            {project?.name}
-                        </Link>
-                        <button onClick={handleUpdateProject}><EditOutlinedIcon /></button>
-                        <button onClick={handleDeleteProject}><DeleteOutlineOutlinedIcon /></button>
-                    </>
-            }
-        </li>
+        <>
+            <li className="project-item">
+                {
+                    updateOn ? 
+                        <>
+                            <input 
+                                type="text" 
+                                value={projectName} 
+                                onChange={e => setProjectName(e.target.value)} />
+                            <button type="submit" onClick={handleSubmit}>
+                                <DoneOutlinedIcon />
+                            </button>
+                            <button onClick={handleUpdateProject}><CloseOutlinedIcon /></button>
+                        </>
+                        :
+                        <>
+                            <Link href={routes.projectRoute(project.id)}>
+                                {project?.name}
+                            </Link>
+                            <button onClick={handleUpdateProject}><EditOutlinedIcon /></button>
+                            <button onClick={handleDeleteProject}>
+                                <DeleteOutlineOutlinedIcon />
+                            </button>
+                        </>
+                }
+            </li>
+            { 
+                message.isError && 
+                <SnackbarWrapper open={open} setOpen={setOpen} message={message.text} />}
+        </>
+        
     );
 };
 

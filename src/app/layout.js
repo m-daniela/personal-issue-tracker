@@ -7,6 +7,7 @@ import { store } from "@/redux/store";
 import { apiUrls } from "@/utils/generalConstants";
 import { Inter } from "next/font/google";
 import "../../styles/global.scss";
+import { APIResponseError } from "@/utils/errors/errors";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,13 +31,16 @@ const fetchProjects = async () => {
 
 export default async function RootLayout({ children }) {
     const projects = await fetchProjects();
+    if(projects.error){
+        throw new APIResponseError(projects.error.message);
+    }
 
     return (
         <html lang="en">
             <body className={inter.className}>
                 <SelectedProjectProvider>
-                    <ProjectsPreloader data={projects}/>
                     <StoreProvider>
+                        <ProjectsPreloader data={projects}/>
                         <Navbar />
                         <main>{children}</main>
                     </StoreProvider>

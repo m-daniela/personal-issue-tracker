@@ -4,8 +4,9 @@ import { addTaskToCategory } from "@/redux/features/categoriesSlice";
 import { apiUrls, routes } from "@/utils/generalConstants";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
+import SnackbarWrapper from "../SnackbarWrapper";
 
 
 /**
@@ -20,6 +21,11 @@ import { useDispatch } from "react-redux";
 const AddTask = ({projectId, categoryId}) => {
     const dispatch = useDispatch();
     const router = useRouter();
+    const [open, setOpen] = useState(true);
+    const [message, setMessage] = useState({
+        text: "", 
+        isError: false
+    });
 
     const handleSubmitNewTask = async (e) => {
         e.preventDefault();
@@ -40,8 +46,21 @@ const AddTask = ({projectId, categoryId}) => {
             });
         const task = await response.json();
 
-        dispatch(addTaskToCategory({categoryId, task}));
-
+        if (task.error) {
+            setMessage({
+                text: `Error while adding the task: ${task.error.message}`, 
+                isError: true
+            });
+            setOpen(true);
+        }
+        else{
+            setMessage({
+                text: "The task was added", 
+                isError: false
+            });
+            setOpen(true);
+            dispatch(addTaskToCategory({categoryId, task}));
+        }
     };
 
     const handleBack = (e) => {
@@ -51,23 +70,34 @@ const AddTask = ({projectId, categoryId}) => {
     };
 
     return (
-        <form onSubmit={handleSubmitNewTask}>
-            <label>Name</label>
-            <input type="text" />
+        <>
+            <form onSubmit={handleSubmitNewTask}>
+                <label>Name</label>
+                <input type="text" />
                 
-            <label>Description</label>
-            <textarea />
+                <label>Description</label>
+                <textarea />
 
-            <label>Notes</label>
-            <textarea />
+                <label>Notes</label>
+                <textarea />
 
-            <div className="controls">
-                <button className="secondary">
-                    <Link href={routes.projectRoute(projectId)}>Go back</Link>
-                </button>
-                <button type="submit" className="primary">Add task</button>
-            </div>
-        </form>
+                {/* <span className={message.isError ? "message-error" : "message-success"}>
+                    {message.text}
+                </span> */}
+
+                <div className="controls">
+                    <button className="secondary">
+                        <Link href={routes.projectRoute(projectId)}>Go back</Link>
+                    </button>
+                    <button type="submit" className="primary">Add task</button>
+                </div>
+            </form>
+            {
+                message.text && 
+                <SnackbarWrapper open={open} setOpen={setOpen} message={message.text} />
+            }
+        </>
+        
     );
 };
 

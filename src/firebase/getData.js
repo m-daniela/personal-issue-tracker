@@ -11,6 +11,7 @@ import { doc, getDoc, collection, query, getDocs, orderBy } from "firebase/fires
  * @returns list with project objects
  */
 export const getProjects = async () => {
+    return errorMessageBuilder(`Could not find project ${123}.`);
     const projects = [];
     const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at"));
 
@@ -44,13 +45,21 @@ export const getProjects = async () => {
  * associated categories and tasks
  */
 export const getCategoriesAndTasks = async (projectId) => {
-    const {categories, categoryIds} = await getCategories(projectId);
-    const tasksAndCategories = await getTasksByCategory(projectId, categories);
-    return {
-        id: projectId, 
-        categoryIds,
-        ...tasksAndCategories
-    };
+    try {
+        const {categories, categoryIds} = await getCategories(projectId);
+        const tasksAndCategories = await getTasksByCategory(projectId, categories);
+        return {
+            id: projectId, 
+            categoryIds,
+            ...tasksAndCategories
+        };
+    }
+    catch (error) {
+        return errorMessageBuilder(
+            `Could not retrieve categories and tasks for project ${projectId}`, 
+            error.message ? error.message : JSON.stringify(error));
+    }
+    
 };
 
 
@@ -150,7 +159,7 @@ export const getTask = async (projectId, categoryId, taskId) => {
         };
         return task;
     } else {
-        return errorMessageBuilder("The task does not exist");
+        return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
     }
 };
 

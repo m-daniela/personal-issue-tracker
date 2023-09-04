@@ -1,5 +1,5 @@
 import db from "@/firebase/config";
-import { dbCollectionNames } from "@/utils/dbConstants";
+import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, updateDoc, Timestamp } from "firebase/firestore";
 import { categoryExists, getTask, projectExists } from "./getData";
 import { addTask } from "./addData";
@@ -29,7 +29,8 @@ export const updateProject = async (projectId, projectData) => {
         return projectDataWithTimestamps;
     }
     catch (error){
-        return errorMessageBuilder(`Could not update project "${projectData.name}"`, error.message);
+        return errorMessageBuilder(
+            `Could not update project "${projectData.name}" - ${projectId}`, error.message);
     }
 };
 
@@ -56,10 +57,10 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
     const isCategory = await categoryExists(projectId, categoryId);
 
     if (!isProject){
-        return errorMessageBuilder("The project does not exist");
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
     }
     if (!isCategory){
-        return errorMessageBuilder("The category does not exist");
+        return errorMessageBuilder(`Could not find category ${categoryId}.`);
     }
 
     try{
@@ -67,7 +68,7 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
         return taskDataWithTimestamps;
     }
     catch (error){
-        return errorMessageBuilder("The task does not exist", error.message);
+        return errorMessageBuilder(`Could not update task ${taskId}.`, error.message);
     }
 };
 
@@ -92,14 +93,10 @@ export const updateTaskCategory = async (projectId, categoryIdFrom, categoryIdTo
     const isCategoryFrom = await categoryExists(projectId, categoryIdFrom);
     const isCategoryTo = await categoryExists(projectId, categoryIdTo);
     if (!isProject){
-        return {
-            error: "The project does not exist"
-        };
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
     }
     if (!isCategoryFrom && !isCategoryTo){
-        return {
-            error: "The category does not exist"
-        };
+        return errorMessageBuilder(`Could not find category ${categoryIdFrom} or ${categoryIdTo}.`);
     }
     try{
         await addTask(projectId, categoryIdTo, taskDataWithTimestamps);
@@ -107,11 +104,6 @@ export const updateTaskCategory = async (projectId, categoryIdFrom, categoryIdTo
         return taskDataWithTimestamps;
     }
     catch (error){
-        return {
-            error: {
-                message: `Could not update task "${task.name}"`, 
-                reason: error.message
-            }
-        };
+        return errorMessageBuilder( `Could not update task "${task.name}"`, error.message);
     }
 };

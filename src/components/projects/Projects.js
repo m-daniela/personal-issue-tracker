@@ -13,7 +13,6 @@ import { SelectedProjectContext } from "../context/SelectedProjectProvider";
 const Projects = () => {
     const projects = useSelector(projectsSelector);
     const {handleSelectProject} = useContext(SelectedProjectContext);
-
     // reset the selected project
     useEffect(() => {
         handleSelectProject({});
@@ -22,7 +21,7 @@ const Projects = () => {
     return (
         <section className="projects">
             <ul className="projects-list">
-                {projects.map(project => <ProjectItem key={project.id} project={project}/>)}
+                {projects?.map(project => <ProjectItem key={project.id} project={project}/>)}
             </ul>
         </section>
     );

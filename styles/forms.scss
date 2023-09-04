@@ -4,6 +4,12 @@ form {
     .controls {
         margin: 1em 0;
     }
+    .message-error {
+        color: var(--error);
+    }
+    .message-success {
+        color: var(--success);
+    }
 }
 
 input, textarea, select {
@@ -20,7 +26,7 @@ input, textarea, select {
 
 button{
     @include hover;
-    padding: 5px 7px;
+    padding: 7px 10px;
     border: none;
     background-color: transparent;
     border-radius: var(--border-radius);

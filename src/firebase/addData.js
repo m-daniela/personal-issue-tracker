@@ -23,23 +23,30 @@ export const addProject = async (projectData) => {
         projectDataWithTimestamps);
 
     const batch = writeBatch(db);
-    defaultCategories.forEach((name, i) => {
-        const categoryData = {
-            name, 
-            order_no: i
-        };
-        const category = doc(collection(
-            db, ...dbCollectionNames.categoriesPath(newProject.id)));
-        batch.set(category, categoryData);
-    });
 
-    await batch.commit();
+    try {
+        defaultCategories.forEach((name, i) => {
+            const categoryData = {
+                name, 
+                order_no: i
+            };
+            const category = doc(collection(
+                db, ...dbCollectionNames.categoriesPath(newProject.id)));
+            batch.set(category, categoryData);
+        });
     
-
-    return {
-        "id": newProject.id, 
-        ...projectDataWithTimestamps
-    };
+        await batch.commit();
+        
+    
+        return {
+            "id": newProject.id, 
+            ...projectDataWithTimestamps
+        };
+    }
+    catch (error) {
+        return errorMessageBuilder(error.message ? error.message : JSON.stringify(error));
+    }
+    
 };
 
 
@@ -55,10 +62,10 @@ export const addTask = async (projectId, categoryId, taskData) => {
     const isProject = await projectExists(projectId);
     const isCategory = await categoryExists(projectId, categoryId);
     if (!isProject){
-        return errorMessageBuilder("The project does not exist");
+        return errorMessageBuilder(`Could not retrieve project ${projectId}.`);
     }
     if (!isCategory){
-        return errorMessageBuilder("The category does not exist");
+        return errorMessageBuilder(`Could not retrieve category ${categoryId}.`);
     }
     if (!taskData.id) {
         const taskDataWithTimestamps = {
