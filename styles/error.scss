@@ -1,0 +1,16 @@
+
+.error {
+    display: flex;
+    flex-direction: column;
+    width: 75%;
+    height: 100%;
+    h2, div, button {
+        margin: .5em auto;
+    }
+    h2, p, div {
+        align-self: center;
+    }
+    .highlighted {
+        color: var(--accent-color);
+    }
+}

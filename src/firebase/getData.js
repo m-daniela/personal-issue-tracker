@@ -44,13 +44,21 @@ export const getProjects = async () => {
  * associated categories and tasks
  */
 export const getCategoriesAndTasks = async (projectId) => {
-    const {categories, categoryIds} = await getCategories(projectId);
-    const tasksAndCategories = await getTasksByCategory(projectId, categories);
-    return {
-        id: projectId, 
-        categoryIds,
-        ...tasksAndCategories
-    };
+    try {
+        const {categories, categoryIds} = await getCategories(projectId);
+        const tasksAndCategories = await getTasksByCategory(projectId, categories);
+        return {
+            id: projectId, 
+            categoryIds,
+            ...tasksAndCategories
+        };
+    }
+    catch (error) {
+        return errorMessageBuilder(
+            `Could not retrieve categories and tasks for project ${projectId}`, 
+            error.message ? error.message : JSON.stringify(error));
+    }
+    
 };
 
 
@@ -150,7 +158,7 @@ export const getTask = async (projectId, categoryId, taskId) => {
         };
         return task;
     } else {
-        return errorMessageBuilder("The task does not exist");
+        return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
     }
 };
 
