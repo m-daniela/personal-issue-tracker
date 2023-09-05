@@ -11,7 +11,6 @@ import { doc, getDoc, collection, query, getDocs, orderBy } from "firebase/fires
  * @returns list with project objects
  */
 export const getProjects = async () => {
-    return errorMessageBuilder(`Could not find project ${123}.`);
     const projects = [];
     const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at"));
 
