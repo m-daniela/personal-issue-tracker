@@ -182,7 +182,7 @@ const Task = ({projectId, categoryId, taskData}) => {
                             <div>{task.description}</div>
                             <label>Notes</label>
                             <div>{task.notes}</div>
-                            <div>
+                            {/* <div>
                                 <select onChange={handleOnChangeCategory} value={category}>
                                     {Object.keys(categoryIds).map(categoryName => <option 
                                         key={categoryName} 
@@ -191,7 +191,7 @@ const Task = ({projectId, categoryId, taskData}) => {
                                 <button 
                                     className="primary" 
                                     onClick={handleMoveToCategory}>Move to category</button>
-                            </div>
+                            </div> */}
 
                         </>
                 }

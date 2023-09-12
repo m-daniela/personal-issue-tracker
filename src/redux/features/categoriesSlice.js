@@ -29,6 +29,15 @@ export const categoriesSliceActuallyNormalized = createSlice({
             state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks.filter(
                 currentTaskId => currentTaskId !== taskId);
         }, 
+        updateCategoryOrder: (state, action) => {
+            return {
+                ...state, 
+                categoryIds: action.payload
+            };
+        },
+        updateTaskOrder: (state, action) => {
+            return state;
+        },
     }
 });
 
@@ -44,7 +53,9 @@ export const {
     addTaskToCategory, 
     deleteTaskFromCategory, 
     updateTask, 
-    moveTaskToCategory 
+    moveTaskToCategory,
+    updateCategoryOrder,
+    updateTaskOrder
 } = categoriesSliceActuallyNormalized.actions;
 
 export default categoriesSliceActuallyNormalized.reducer;

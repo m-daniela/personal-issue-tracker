@@ -68,12 +68,13 @@ export const getCategoriesAndTasks = async (projectId) => {
  * the tasks) and an object with categoryName - categoryId 
  * pairs
  * @param {string} projectId 
- * @returns caetgory data and an object with categoryName - 
+ * @returns category data and an object with categoryName - 
  * categoryId pairs
  */
 const getCategories = async (projectId) => {
     const categories = {};
-    const categoryIds = {};
+    // const categoryIds = {};
+    const categoryIds = [];
     const q = query(collection(
         db, ...dbCollectionNames.getCategoriesPath(projectId)), 
     orderBy("order_no"));
@@ -82,9 +83,10 @@ const getCategories = async (projectId) => {
 
     snapshot.forEach((document) => {
         const documentData = document.data();
-        categoryIds[documentData.name] = {
-            id: document.id
-        };
+        // categoryIds[documentData.name] = {
+        //     id: document.id
+        // };
+        categoryIds.push(document.id);
         const categoryDetails = {
             "id": document.id, 
             ...documentData, 
