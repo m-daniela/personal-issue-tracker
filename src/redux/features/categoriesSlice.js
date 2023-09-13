@@ -23,7 +23,7 @@ export const categoriesSliceActuallyNormalized = createSlice({
             const task = action.payload.task;
             state.tasks[task.id] = task;
         }, 
-        moveTaskToCategory: (state, action) => {
+        moveTaskToNewCategory: (state, action) => {
             const {categoryIdFrom, categoryIdTo, taskId} = action.payload;
             state.categories[categoryIdTo].tasks.push(taskId);
             state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks.filter(
@@ -36,12 +36,43 @@ export const categoriesSliceActuallyNormalized = createSlice({
             };
         },
         updateTaskOrder: (state, action) => {
-            return state;
+            const {categoryId, taskIds} = action.payload;
+            return {
+                ...state, 
+                categories: {
+                    ...state.categories,
+                    [categoryId]: {
+                        ...state.categories[categoryId], 
+                        tasks: taskIds
+                    }
+                }
+            };
         },
+        moveTaskToCategory: (state, action) => {
+            const {categoryIdFrom, categoryIdTo, taskIdsFrom, taskIdsTo} = action.payload;
+            // state.categories[categoryIdTo].tasks.push(taskId);
+            // state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks
+            // .filter(currentTaskId => currentTaskId !== taskId);
+            return {
+                ...state, 
+                categories: {
+                    ...state.categories, 
+                    [categoryIdFrom]: {
+                        ...state.categories[categoryIdFrom],
+                        tasks: taskIdsFrom 
+                    }, 
+                    [categoryIdTo]: {
+                        ...state.categories[categoryIdTo],
+                        tasks: taskIdsTo
+                    }
+                }
+            };
+        }, 
     }
 });
 
 export const getTaskById = id => state => state.categories.tasks[id];
+export const getTaskIdsFromCategory = id => state => state.categories[id];
 
 export const categoriesSelector = (state) => state.categories.categories;
 export const tasksSelector = (state) => state.categories.tasks;
@@ -54,6 +85,7 @@ export const {
     deleteTaskFromCategory, 
     updateTask, 
     moveTaskToCategory,
+    moveTaskToNewCategory,
     updateCategoryOrder,
     updateTaskOrder
 } = categoriesSliceActuallyNormalized.actions;
