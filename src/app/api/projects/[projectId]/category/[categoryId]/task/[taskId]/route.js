@@ -21,7 +21,9 @@ export async function PUT(request, {params}) {
     if (taskData.categoryIdTo) {
         const categoryIdFrom = categoryId;
         const categoryIdTo = taskData.categoryIdTo;
-        newTaskData = await updateTaskCategory(projectId, categoryIdFrom, categoryIdTo, taskId);
+        const taskIds = taskData.taskIds;
+        newTaskData = await updateTaskCategory(
+            projectId, categoryIdFrom, categoryIdTo, taskId, taskIds);
     }
     else {
         newTaskData = await updateTask(projectId, categoryId, taskId, taskData);

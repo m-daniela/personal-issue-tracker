@@ -8,6 +8,7 @@ import {
     projectExists, 
     getTask 
 } from "./getData";
+import { updateCategoryTaskArray } from "./updateData";
 
 
 /**
@@ -20,7 +21,7 @@ import {
 export const deleteProject = async (projectId) => {
     const isProject = await projectExists(projectId);
     if (!isProject) {
-        return errorMessageBuilder("The project does not exist");
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
     }
 
     const categoryIds = await getCategoryIdsFromProject(projectId);
@@ -46,6 +47,7 @@ export const deleteProject = async (projectId) => {
 
 /**
  * Delete task
+ * This also deletes the task from the parent category
  * @param {string} projectId 
  * @param {string} categoryId 
  * @param {string} taskId 
@@ -55,18 +57,18 @@ export const deleteTask = async (projectId, categoryId, taskId) => {
     const isProject = await projectExists(projectId);
     const isCategory = await categoryExists(projectId, categoryId);
     if (!isProject){
-        return errorMessageBuilder("The project does not exist");
-
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
     }
     if (!isCategory){
-        return errorMessageBuilder("The category does not exist");
-
+        return errorMessageBuilder(`Could not find category ${categoryId}.`);
     }
     const task = await getTask(projectId, categoryId, taskId);
     if ("error" in task){
-        return task;
+        return errorMessageBuilder(task.error.message, data=task);
     }
     await deleteDoc(doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId)));
+    await updateCategoryTaskArray(projectId, categoryId, taskId, false);
+    
     return {
         id: taskId
     };

@@ -2,6 +2,7 @@ import db from "@/firebase/config";
 import { dbCollectionNames, defaultCategories, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, addDoc, collection, Timestamp, writeBatch, setDoc } from "firebase/firestore"; 
 import { categoryExists, projectExists } from "./getData";
+import { updateCategory, updateCategoryTaskArray, updateProject } from "./updateData";
 
 
 /**
@@ -19,27 +20,40 @@ export const addProject = async (projectData) => {
         updated_at: Timestamp.fromDate(new Date()), 
     };
     const newProject = await addDoc(
-        collection(db, dbCollectionNames.projectsPath), 
-        projectDataWithTimestamps);
+        collection(db, dbCollectionNames.projectsPath), projectDataWithTimestamps);
+
+    const category_order = [];
 
     const batch = writeBatch(db);
-    defaultCategories.forEach((name, i) => {
-        const categoryData = {
-            name, 
-            order_no: i
-        };
-        const category = doc(collection(
-            db, ...dbCollectionNames.categoriesPath(newProject.id)));
-        batch.set(category, categoryData);
-    });
 
-    await batch.commit();
+    try {
+        defaultCategories.forEach((name, i) => {
+            const categoryData = {
+                name, 
+                tasks: [],
+                created_at: Timestamp.fromDate(new Date()), 
+                updated_at: Timestamp.fromDate(new Date()), 
+            };
+            const category = doc(collection(
+                db, ...dbCollectionNames.categoriesPath(newProject.id)));
+            category_order.push(category.id);
+            batch.set(category, categoryData);
+        });
     
-
-    return {
-        "id": newProject.id, 
-        ...projectDataWithTimestamps
-    };
+        await batch.commit();
+        
+        await updateProject(newProject.id, {category_order});
+    
+        return {
+            "id": newProject.id, 
+            ...projectDataWithTimestamps,
+            category_order
+        };
+    }
+    catch (error) {
+        return errorMessageBuilder(error.message ? error.message : JSON.stringify(error));
+    }
+    
 };
 
 
@@ -55,29 +69,45 @@ export const addTask = async (projectId, categoryId, taskData) => {
     const isProject = await projectExists(projectId);
     const isCategory = await categoryExists(projectId, categoryId);
     if (!isProject){
-        return errorMessageBuilder("The project does not exist");
+        return errorMessageBuilder(`Could not retrieve project ${projectId}.`);
     }
     if (!isCategory){
-        return errorMessageBuilder("The category does not exist");
+        return errorMessageBuilder(`Could not retrieve category ${categoryId}.`);
     }
-    if (!taskData.id) {
-        const taskDataWithTimestamps = {
-            ...taskData, 
-            created_at: Timestamp.fromDate(new Date()), 
-            updated_at: Timestamp.fromDate(new Date())
-        };
-        const newTask = await addDoc(
-            collection(db, ...dbCollectionNames.tasksPath(
-                projectId, categoryId)), taskDataWithTimestamps);
-        return {
-            "id": newTask.id, 
-            ...taskDataWithTimestamps
-        };
-    }
+   
+    const taskDataWithTimestamps = {
+        ...taskData, 
+        created_at: Timestamp.fromDate(new Date()), 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    const newTask = await addDoc(
+        collection(db, ...dbCollectionNames.tasksPath(
+            projectId, categoryId)), taskDataWithTimestamps);
+    const updateCategoryMessage = await updateCategoryTaskArray(
+        projectId, categoryId, newTask.id, true);
+    console.log(updateCategoryMessage);
+    return {
+        "id": newTask.id, 
+        ...taskDataWithTimestamps
+    };
+};
+
+
+/**
+ * Add a task to the given category and update the order of the tasks
+ * for that category
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {object} taskData 
+ * @param {string[]} taskIdsTo 
+ * @returns task data of the added task
+ */
+export const addTaskToCategory = async (projectId, categoryId, taskData, taskIdsTo) => {
     const {id, ...data} = taskData;
     await setDoc(doc(
         db, 
         ...dbCollectionNames.taskPath(projectId, categoryId, id)), 
     data, id);
+    await updateCategory(projectId, categoryId, {tasks: taskIdsTo});
     return taskData;
 };

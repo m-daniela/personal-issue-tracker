@@ -13,9 +13,10 @@ export const dbCollectionNames = {
 
 export const defaultCategories = ["todo", "in progress", "blocked", "pr", "testing", "done"];
 
-export const errorMessageBuilder = (message, reason = undefined) => {
+export const errorMessageBuilder = (message, reason = undefined, data={}) => {
     const error = {
-        message
+        message, 
+        data
     };
     if (reason){
         error.reason = reason;

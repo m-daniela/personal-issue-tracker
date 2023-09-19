@@ -12,7 +12,7 @@ import { doc, getDoc, collection, query, getDocs, orderBy } from "firebase/fires
  */
 export const getProjects = async () => {
     const projects = [];
-    const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at"));
+    const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at", "desc"));
 
     const snapshot = await getDocs(q);
 
@@ -44,43 +44,47 @@ export const getProjects = async () => {
  * associated categories and tasks
  */
 export const getCategoriesAndTasks = async (projectId) => {
-    const {categories, categoryIds} = await getCategories(projectId);
-    const tasksAndCategories = await getTasksByCategory(projectId, categories);
-    return {
-        id: projectId, 
-        categoryIds,
-        ...tasksAndCategories
-    };
+    try {
+        const {categories, categoryIds} = await getCategories(projectId);
+        const tasksAndCategories = await getTasksByCategory(projectId, categories);
+        return {
+            id: projectId, 
+            categoryIds,
+            ...tasksAndCategories
+        };
+    }
+    catch (error) {
+        return errorMessageBuilder(
+            `Could not retrieve categories and tasks for project ${projectId}`, 
+            error.message ? error.message : JSON.stringify(error));
+    }
+    
 };
 
 
 /**
  * Get the categories
  * Returns a normalized object of category data (without
- * the tasks) and an object with categoryName - categoryId 
- * pairs
+ * the tasks) and a list of categories, in th order in
+ * which they will be displayed
  * @param {string} projectId 
- * @returns caetgory data and an object with categoryName - 
- * categoryId pairs
+ * @returns category data and a list of categories, in 
+ * display order
  */
 const getCategories = async (projectId) => {
     const categories = {};
-    const categoryIds = {};
+    const categoryIds = [];
     const q = query(collection(
-        db, ...dbCollectionNames.getCategoriesPath(projectId)), 
-    orderBy("order_no"));
+        db, ...dbCollectionNames.getCategoriesPath(projectId)));
 
     const snapshot = await getDocs(q);
 
     snapshot.forEach((document) => {
         const documentData = document.data();
-        categoryIds[documentData.name] = {
-            id: document.id
-        };
+        categoryIds.push(document.id);
         const categoryDetails = {
             "id": document.id, 
-            ...documentData, 
-            tasks: []
+            ...documentData
         };
         categories[document.id] = categoryDetails;
     });
@@ -105,7 +109,6 @@ const getCategories = async (projectId) => {
 export const getTasksByCategory = async (projectId, categories) => {
     const normalizedTasks = {};
     for (const categoryId in categories){
-        const tasks = [];
         const q = query(
             collection(db, ...dbCollectionNames.tasksPath(
                 projectId, categoryId)), orderBy("created_at"));
@@ -118,9 +121,7 @@ export const getTasksByCategory = async (projectId, categories) => {
                 "id": taskId, 
                 ...taskData
             };
-            tasks.push(taskId);
         });
-        categories[categoryId].tasks = tasks;
     }
 
     return {
@@ -150,7 +151,7 @@ export const getTask = async (projectId, categoryId, taskId) => {
         };
         return task;
     } else {
-        return errorMessageBuilder("The task does not exist");
+        return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
     }
 };
 
@@ -201,7 +202,6 @@ export const projectExists = async (projectId) => {
     return snapshot.exists();
 };
 
-
 /**
  * Check if category exists
  * @param {string} projectId 
@@ -211,6 +211,5 @@ export const projectExists = async (projectId) => {
 export const categoryExists = async (projectId, categoryId) => {
     const collectionPath = dbCollectionNames.categoryPath(projectId, categoryId);
     const docRef = doc(db, ...collectionPath);
-    const snapshot = await getDoc(docRef);
-    return snapshot.exists();
+    return (await getDoc(docRef)).exists();
 };
