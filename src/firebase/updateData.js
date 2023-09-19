@@ -1,8 +1,8 @@
 import db from "@/firebase/config";
 import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
-import { doc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, updateDoc, Timestamp, arrayRemove, arrayUnion } from "firebase/firestore";
 import { categoryExists, getTask, projectExists } from "./getData";
-import { addTask } from "./addData";
+import { addTask, addTaskToCategory } from "./addData";
 import { deleteTask } from "./deleteData";
 
 /**
@@ -31,6 +31,82 @@ export const updateProject = async (projectId, projectData) => {
     catch (error){
         return errorMessageBuilder(
             `Could not update project "${projectData.name}" - ${projectId}`, error.message);
+    }
+};
+
+
+/**
+ * Update the category
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {object} categoryData 
+ * @returns updated category
+ */
+export const updateCategory = async (projectId, categoryId, categoryData) => {
+    const category = doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId));
+    const categoryDataWithTimestamps = {
+        ...categoryData, 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    
+    const categoryDataToUpdate = {...categoryDataWithTimestamps};
+    delete categoryDataToUpdate.id;
+    delete categoryDataToUpdate.created_at;
+
+    const isProject = await projectExists(projectId);
+    const isCategory = await categoryExists(projectId, categoryId);
+
+    if (!isProject){
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
+    }
+    if (!isCategory){
+        return errorMessageBuilder(`Could not find category ${categoryId}.`);
+    }
+
+    try{
+        await updateDoc(category, categoryDataToUpdate);
+        return categoryDataWithTimestamps;
+    }
+    catch (error){
+        return errorMessageBuilder(`Could not update category ${categoryId}.`, error.message);
+    }
+};
+
+
+/**
+ * Update the task array
+ * The task id will be added or removed based on the value
+ * of the addTask parameter 
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {string} taskId 
+ * @param {boolean} addTask 
+ * @returns success message if the task array was updated, 
+ * error message otherwise
+ */
+export const updateCategoryTaskArray = async (projectId, categoryId, taskId, addTask) => {
+    const category = doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId));
+    try{
+        if (addTask) {
+            await updateDoc(category, {
+                tasks: arrayUnion(taskId), 
+                updated_at: Timestamp.fromDate(new Date())
+            });
+        }
+        else {
+            await updateDoc(category, {
+                tasks: arrayRemove(taskId), 
+                updated_at: Timestamp.fromDate(new Date())
+            });
+        }
+        return {
+            success: {
+                message: `Tasks list updated for category ${categoryId}`
+            }
+        };
+    }
+    catch (error){
+        return errorMessageBuilder(`Could not update category ${categoryId}.`, error.message);
     }
 };
 
@@ -81,9 +157,10 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
  * @param {string} categoryIdFrom 
  * @param {string} categoryIdTo
  * @param {string} taskId 
- * @returns 
+ * @returns task data
  */
-export const updateTaskCategory = async (projectId, categoryIdFrom, categoryIdTo, taskId) => {
+export const updateTaskCategory = async (
+    projectId, categoryIdFrom, categoryIdTo, taskId, taskIds) => {
     const task = await getTask(projectId, categoryIdFrom, taskId);
     const taskDataWithTimestamps = {
         ...task, 
@@ -99,8 +176,13 @@ export const updateTaskCategory = async (projectId, categoryIdFrom, categoryIdTo
         return errorMessageBuilder(`Could not find category ${categoryIdFrom} or ${categoryIdTo}.`);
     }
     try{
-        await addTask(projectId, categoryIdTo, taskDataWithTimestamps);
-        await deleteTask(projectId, categoryIdFrom, taskId);
+        if (categoryIdFrom === categoryIdTo){
+            await updateCategory(projectId, categoryIdFrom, {tasks: taskIds});
+        }
+        else{
+            await addTaskToCategory(projectId, categoryIdTo, taskDataWithTimestamps, taskIds);
+            await deleteTask(projectId, categoryIdFrom, taskId);
+        }
         return taskDataWithTimestamps;
     }
     catch (error){

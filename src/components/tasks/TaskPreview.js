@@ -1,10 +1,13 @@
 "use client";
 import { deleteTaskFromCategory, getTaskById } from "@/redux/features/categoriesSlice";
-import { apiUrls } from "@/utils/generalConstants";
+import { apiUrls, routes, draggableStyle } from "@/utils/generalConstants";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import SnackbarWrapper from "../SnackbarWrapper";
+import Link from "next/link";
+import { useSortable } from "@dnd-kit/sortable";
+import {CSS} from "@dnd-kit/utilities";
 
 /**
  * Display the task in a card
@@ -21,14 +24,27 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
     const task = useSelector(getTaskById(taskId));
     const dispatch = useDispatch();
 
+    const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
+        id: task.id, 
+        data: {
+            type: "task", 
+            task: task,
+            categoryId
+        }
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition
+    };
+
     const handleDelete = async (e) => {
         e.preventDefault();
 
-        const response = await fetch(apiUrls.deleteTask(projectId, categoryId, taskId), {
+        const response = await fetch(apiUrls.deleteTask(projectId, categoryId, task.id), {
             method: "DELETE", 
         });
         const removedTask = await response.json();
-        console.log(removedTask);
         if (removedTask.error) {
             setMessage({
                 text: `Error while deleting the task: ${removedTask.error.message}`, 
@@ -46,9 +62,26 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
         }
     };
 
-    return (
-        <>
-            <div className="tasks task-preview">
+    if (isDragging){
+        return (<div className="tasks task-preview dragging"
+            ref={setNodeRef}
+            style={{
+                ...style,
+                ...draggableStyle
+            }}
+            {...attributes}
+            {...listeners}
+        />);
+    }
+
+    return (<>
+        <Link href={routes.taskRoute(projectId, categoryId, task.id)} >
+            <div 
+                className="tasks task-preview"
+                ref={setNodeRef}
+                style={style}
+                {...attributes}
+                {...listeners}>
                 <div className="controls">
                     <span className="task-title"><strong>{task.name}</strong></span>
                     <span className="delete-button" onClick={handleDelete}>
@@ -59,10 +92,12 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
                     {/* <div className="overlay"></div> */}
                 </div>
             </div>
-            {
-                message.isError && 
+        </Link>
+        {
+            message.isError && 
                 <SnackbarWrapper open={open} setOpen={setOpen} message={message.text} />
-            }</>
+        }
+    </>
         
     );
 };

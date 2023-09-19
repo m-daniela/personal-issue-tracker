@@ -26,12 +26,13 @@ export const projectsSlice = createSlice({
 });
 
 export const projectsSelector = (state) => state.projects;
-export const projectSelectorById = (id) => (state) => {
+
+export const projectById = (id, projects) => {
     if (!id){
-        return {};
+        return null;
     }
-    const project = state.projects.filter(project => project.id === id);
-    return project.length === 1 ? project[0] : {};
+    const project = projects.filter(project => project.id === id);
+    return project.length === 1 ? project[0] : null;
 };
 
 export const { setProjects, addProject, deleteProject, updateProject } = projectsSlice.actions;

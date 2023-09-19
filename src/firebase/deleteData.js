@@ -8,6 +8,7 @@ import {
     projectExists, 
     getTask 
 } from "./getData";
+import { updateCategoryTaskArray } from "./updateData";
 
 
 /**
@@ -46,6 +47,7 @@ export const deleteProject = async (projectId) => {
 
 /**
  * Delete task
+ * This also deletes the task from the parent category
  * @param {string} projectId 
  * @param {string} categoryId 
  * @param {string} taskId 
@@ -65,6 +67,8 @@ export const deleteTask = async (projectId, categoryId, taskId) => {
         return errorMessageBuilder(task.error.message, data=task);
     }
     await deleteDoc(doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId)));
+    await updateCategoryTaskArray(projectId, categoryId, taskId, false);
+    
     return {
         id: taskId
     };

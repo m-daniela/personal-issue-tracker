@@ -23,16 +23,47 @@ export const categoriesSliceActuallyNormalized = createSlice({
             const task = action.payload.task;
             state.tasks[task.id] = task;
         }, 
+        updateCategoryOrder: (state, action) => {
+            return {
+                ...state, 
+                categoryIds: action.payload
+            };
+        },
         moveTaskToCategory: (state, action) => {
-            const {categoryIdFrom, categoryIdTo, taskId} = action.payload;
-            state.categories[categoryIdTo].tasks.push(taskId);
-            state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks.filter(
-                currentTaskId => currentTaskId !== taskId);
+            const {categoryIdFrom, categoryIdTo, taskIdsFrom, taskIdsTo} = action.payload;
+
+            if (categoryIdFrom === categoryIdTo) {
+                return {
+                    ...state, 
+                    categories: {
+                        ...state.categories,
+                        [categoryIdFrom]: {
+                            ...state.categories[categoryIdFrom], 
+                            tasks: taskIdsTo
+                        }
+                    }
+                };
+            }
+            return {
+                ...state, 
+                categories: {
+                    ...state.categories, 
+                    [categoryIdFrom]: {
+                        ...state.categories[categoryIdFrom],
+                        tasks: taskIdsFrom 
+                    }, 
+                    [categoryIdTo]: {
+                        ...state.categories[categoryIdTo],
+                        tasks: taskIdsTo
+                    }
+                }
+            };
         }, 
     }
 });
 
 export const getTaskById = id => state => state.categories.tasks[id];
+export const getTaskIdsFromCategory = id => state => state.categories[id];
 
 export const categoriesSelector = (state) => state.categories.categories;
 export const tasksSelector = (state) => state.categories.tasks;
@@ -44,7 +75,10 @@ export const {
     addTaskToCategory, 
     deleteTaskFromCategory, 
     updateTask, 
-    moveTaskToCategory 
+    moveTaskToCategory,
+    moveTaskToNewCategory,
+    updateCategoryOrder,
+    updateTaskOrder
 } = categoriesSliceActuallyNormalized.actions;
 
 export default categoriesSliceActuallyNormalized.reducer;

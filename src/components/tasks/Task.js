@@ -1,15 +1,11 @@
 "use client";
 
-import { 
-    categoryIdsSelector, 
-    moveTaskToCategory, 
-    updateTask } from "@/redux/features/categoriesSlice";
-import { apiUrls, routes } from "@/utils/generalConstants";
+import { updateTask } from "@/redux/features/categoriesSlice";
+import { apiUrls } from "@/utils/generalConstants";
 import React, {useState} from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PageHeader from "../PageHeader";
-import { useRouter } from "next/navigation";
 import SnackbarWrapper from "../SnackbarWrapper";
 
 
@@ -30,17 +26,14 @@ import SnackbarWrapper from "../SnackbarWrapper";
  * @returns 
  */
 const Task = ({projectId, categoryId, taskData}) => {
-    const categoryIds = useSelector(categoryIdsSelector);
     const dispatch = useDispatch();
     const [updateOn, setUpdateOn] = useState(false);
     const [task, setTask] = useState(taskData);
-    const [category, setCategory] = useState("");
     const [open, setOpen] = useState(true);
     const [message, setMessage] = useState({
         text: "", 
         isError: false
     });
-    const router = useRouter();
 
     const handleOnClose = (e) => {
         e.preventDefault();
@@ -55,49 +48,6 @@ const Task = ({projectId, categoryId, taskData}) => {
                 ...state,
                 [e.target.id]: e.target.value
             };});
-    };
-
-    const handleOnChangeCategory = (e) => {
-        e.preventDefault();
-        setCategory(e.target.value);
-    };
-
-    const handleMoveToCategory = async (e) => {
-        e.preventDefault();
-        const response = await fetch(
-            apiUrls.updateTask(projectId, categoryId, taskData.id), 
-            {
-                method: "PUT",
-                headers: {
-                    "Content-type": "application/json",
-                },
-                body: JSON.stringify({
-                    categoryIdTo: categoryIds[category].id
-                })
-            });
-        const updatedtask = await response.json();
-        console.log(updateTask);
-        if (updatedtask.error) {
-            setMessage({
-                text: `Error while updating the task: ${updatedtask.error.message}`, 
-                isError: true
-            });
-            setOpen(true);
-        }
-        else{
-            setMessage({
-                text: "", 
-                isError: false
-            });
-            setOpen(false);
-            dispatch(moveTaskToCategory({
-                categoryIdFrom: categoryId, 
-                categoryIdTo: categoryIds[category].id, 
-                taskId: taskData.id
-            }));
-            router.push(routes.projectRoute(projectId));
-        }
-
     };
 
     const handleSubmitUpdate = async (e) => {
@@ -157,11 +107,6 @@ const Task = ({projectId, categoryId, taskData}) => {
                                     id="notes" 
                                     onChange={handleOnChange} 
                                     value={task.notes} />
-                            
-                                {/* <span className={
-                                    message.isError ? "message-error" : "message-success"}>
-                                    {message.text}
-                                </span> */}
                                 <div className="controls">
                                     <button 
                                         className="secondary" 
@@ -182,17 +127,6 @@ const Task = ({projectId, categoryId, taskData}) => {
                             <div>{task.description}</div>
                             <label>Notes</label>
                             <div>{task.notes}</div>
-                            <div>
-                                <select onChange={handleOnChangeCategory} value={category}>
-                                    {Object.keys(categoryIds).map(categoryName => <option 
-                                        key={categoryName} 
-                                        value={categoryName}>{categoryName}</option>)}
-                                </select>
-                                <button 
-                                    className="primary" 
-                                    onClick={handleMoveToCategory}>Move to category</button>
-                            </div>
-
                         </>
                 }
             </section>

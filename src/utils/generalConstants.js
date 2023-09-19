@@ -26,3 +26,8 @@ export const routes = {
     `/category/${categoryId}/task/${taskId}`,
     addTaskRoute: (projectId, categoryId) => `/projects/${projectId}/category/${categoryId}/task`,
 };
+
+export const draggableStyle = {
+    backgroundColor: "#7600ad", 
+    opacity: ".3"
+};

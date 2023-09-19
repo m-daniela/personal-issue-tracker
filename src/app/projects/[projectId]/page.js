@@ -23,7 +23,7 @@ const ProjectPage = async ({params}) => {
         <section>
             <PageHeader title="Your tasks" />
             <CategoriesPreloader data={data} />
-            <Categories />
+            <Categories projectId={projectId} />
         </section>
     );
 };
