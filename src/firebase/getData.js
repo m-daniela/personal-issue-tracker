@@ -130,6 +130,29 @@ export const getTasksByCategory = async (projectId, categories) => {
     };
 };
 
+/**
+ * Get category
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @returns object with category data
+ */
+export const getCategory = async (projectId, categoryId) => {
+    const collectionPath = dbCollectionNames.categoryPath(
+        projectId, categoryId);
+    const docRef = doc(db, ...collectionPath);
+    const snapshot = await getDoc(docRef);
+
+    if (snapshot.exists()) {
+        const category = {
+            id: snapshot.id, 
+            ...snapshot.data()
+        };
+        return category;
+    } else {
+        return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
+    }
+};
+
 
 /**
  * Get task
