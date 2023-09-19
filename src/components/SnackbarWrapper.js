@@ -20,6 +20,7 @@ const SnackbarWrapper = ({open, setOpen, message}) => {
         // prevented
         if (e) e.preventDefault();
         if (reason === "clickaway") {
+            setOpen(false);
             return;
         }
   

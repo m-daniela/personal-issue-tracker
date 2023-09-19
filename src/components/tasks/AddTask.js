@@ -81,10 +81,6 @@ const AddTask = ({projectId, categoryId}) => {
                 <label>Notes</label>
                 <textarea />
 
-                {/* <span className={message.isError ? "message-error" : "message-success"}>
-                    {message.text}
-                </span> */}
-
                 <div className="controls">
                     <button className="secondary">
                         <Link href={routes.projectRoute(projectId)}>Go back</Link>
