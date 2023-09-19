@@ -4,7 +4,11 @@ const headers = {
     "Content-type": "application/json",
 };
 
-
+/**
+ * Update project call
+ * @param {object} project 
+ * @returns response with project data or error message
+ */
 export const apiUpdateProject = async (project) => {
     const response = await fetch(
         apiUrls.updateProject(project.id), 
@@ -18,15 +22,17 @@ export const apiUpdateProject = async (project) => {
 
 
 /**
- * 
+ * Update task call
+ * Updates the tasks list from the category and moves
+ * the task to the specified category, if needed
  * @param {string} projectId 
  * @param {string} categoryIdFrom 
  * @param {string} categoryIdTo 
  * @param {string} taskId 
+ * @returns response with task data or error message
  */
 export const apiUpdateTaskAndCategory = async (
     projectId, categoryIdFrom, categoryIdTo, taskId, taskIds) => {
-    console.log(projectId, categoryIdFrom, categoryIdTo, taskId, taskIds);
     const response = await fetch(
         apiUrls.updateTask(projectId, categoryIdFrom, taskId), 
         {
@@ -39,7 +45,6 @@ export const apiUpdateTaskAndCategory = async (
                 taskIds
             })
         });
-    const uTask = await response.json();
-    console.log(uTask);
-    return uTask;
+    const updatedTask = await response.json();
+    return updatedTask;
 };

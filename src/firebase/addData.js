@@ -74,36 +74,34 @@ export const addTask = async (projectId, categoryId, taskData) => {
     if (!isCategory){
         return errorMessageBuilder(`Could not retrieve category ${categoryId}.`);
     }
-    if (!taskData.id) {
-        // if the task data doesn't have an id, add a new task
-        // for the given category
-        const taskDataWithTimestamps = {
-            ...taskData, 
-            created_at: Timestamp.fromDate(new Date()), 
-            updated_at: Timestamp.fromDate(new Date())
-        };
-        const newTask = await addDoc(
-            collection(db, ...dbCollectionNames.tasksPath(
-                projectId, categoryId)), taskDataWithTimestamps);
-        const updateCategoryMessage = await updateCategoryTaskArray(
-            projectId, categoryId, newTask.id, true);
-        console.log(updateCategoryMessage);
-        return {
-            "id": newTask.id, 
-            ...taskDataWithTimestamps
-        };
-    }
-    // otherwise, move the task to the category
-    // save the task order list as well
-    const {id, ...data} = taskData;
-    await setDoc(doc(
-        db, 
-        ...dbCollectionNames.taskPath(projectId, categoryId, id)), 
-    data, id);
-    return taskData;
+   
+    const taskDataWithTimestamps = {
+        ...taskData, 
+        created_at: Timestamp.fromDate(new Date()), 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    const newTask = await addDoc(
+        collection(db, ...dbCollectionNames.tasksPath(
+            projectId, categoryId)), taskDataWithTimestamps);
+    const updateCategoryMessage = await updateCategoryTaskArray(
+        projectId, categoryId, newTask.id, true);
+    console.log(updateCategoryMessage);
+    return {
+        "id": newTask.id, 
+        ...taskDataWithTimestamps
+    };
 };
 
 
+/**
+ * Add a task to the given category and update the order of the tasks
+ * for that category
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {object} taskData 
+ * @param {string[]} taskIdsTo 
+ * @returns task data of the added task
+ */
 export const addTaskToCategory = async (projectId, categoryId, taskData, taskIdsTo) => {
     const {id, ...data} = taskData;
     await setDoc(doc(

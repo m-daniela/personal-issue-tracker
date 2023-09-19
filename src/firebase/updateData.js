@@ -73,6 +73,17 @@ export const updateCategory = async (projectId, categoryId, categoryData) => {
 };
 
 
+/**
+ * Update the task array
+ * The task id will be added or removed based on the value
+ * of the addTask parameter 
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {string} taskId 
+ * @param {boolean} addTask 
+ * @returns success message if the task array was updated, 
+ * error message otherwise
+ */
 export const updateCategoryTaskArray = async (projectId, categoryId, taskId, addTask) => {
     const category = doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId));
     try{
@@ -146,7 +157,7 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
  * @param {string} categoryIdFrom 
  * @param {string} categoryIdTo
  * @param {string} taskId 
- * @returns 
+ * @returns task data
  */
 export const updateTaskCategory = async (
     projectId, categoryIdFrom, categoryIdTo, taskId, taskIds) => {

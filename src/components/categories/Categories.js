@@ -62,6 +62,8 @@ const Categories = ({projectId}) => {
         return <p>loading</p>;
     }
 
+    // TODO: overlay is not displaying anymore when moving 
+    // TODO: over another category
     const handleCreatePortal = () => {
         if (typeof window === "object") {
             return createPortal(<DragOverlay>
@@ -91,7 +93,7 @@ const Categories = ({projectId}) => {
             setActiveCategory(e.active.data.current.category);
             return;
         }
-
+        // save the dragging task
         if (e.active.data.current?.type === "task"){
             setActiveTask({
                 taskId: e.active.data.current.task.id, 
@@ -111,6 +113,8 @@ const Categories = ({projectId}) => {
             return;
         }
 
+        // if the active element is a category, update the 
+        // category order and persist the changes
         if (active.data.current?.type === "category"){
             const activeColumnId = active.id;
             const overColumnId = over.id;
@@ -130,18 +134,19 @@ const Categories = ({projectId}) => {
                 ...project, 
                 category_order: categoryIds
             };
-
             
             dispatch(updateProject(updatedProject));
             dispatch(updateCategoryOrder(categoryIds));
             await apiUpdateProject(updatedProject);
+
             return;
         }
 
+        // if the active element is a task, use the data collected
+        // on drag and persist the changes
         if (active.data.current.type === "task"){
-            console.log(moveTaskData);
-            if (moveTaskData){
 
+            if (moveTaskData){
                 dispatch(moveTaskToCategory(moveTaskData));
                 const {
                     categoryIdFrom, 
@@ -157,96 +162,6 @@ const Categories = ({projectId}) => {
         }
     };
 
-    const handleOnDragOverOld =(e) => {
-        console.log("drag over", e);
-
-        const {active, over} = e;
-        if (!over) {
-            return;
-        }
-
-        const activeCategoryId = e.active.data.current.categoryId;
-
-        // the active element is not a task, so it doesn't belong
-        // to a category
-        if (!activeCategoryId) return;
-
-        const taskIdsFrom = categories[activeCategoryId].tasks;
-        const activeTaskId = active.id;
-        const overId = over.id;
-
-        const isActiveTask = active.data.current?.type === "task";
-        const isOverTask = over.data.current?.type === "task";
-
-        if (!isActiveTask) {
-            return;
-        }
-
-        const categoryIdFrom = active.data.current?.categoryId;
-        let categoryIdTo;
-
-        if (isOverTask) {
-            categoryIdTo = over.data.current?.categoryId;
-        }
-        else{
-            // it will be a column since I have already checked if 
-            // it is null
-            categoryIdTo = overId;
-        }
-
-        // check if the columns are the same and reorder the tasks
-        if (categoryIdFrom === categoryIdTo){
-            const indexSource = taskIdsFrom.findIndex(id => id === activeTaskId);
-            const indexDestination = taskIdsFrom.findIndex(id => id === overId);
-
-            const taskIds = arrayMove(taskIdsFrom, indexSource, indexDestination);
-
-            // apiUpdateTaskAndCategory(
-            //     projectId, categoryIdFrom, categoryIdTo, activeTaskId, taskIds);
-            
-            dispatch(updateTaskOrder({categoryId: activeCategoryId, taskIds}));
-        }
-
-        // check if the columns are different and move the task to 
-        // the new column, in the right position
-
-        if (categoryIdFrom !== categoryIdTo) {
-            if (isOverTask){
-                const activeTaskIds = taskIdsFrom.filter(id => id !== activeTaskId);
-                const taskIdsTo = categories[categoryIdTo].tasks;
-    
-                const indexSource = taskIdsTo.findIndex(id => id === activeTaskId);
-                const indexDestination = taskIdsTo.findIndex(id => id === overId);
-    
-                const taskIds = arrayMove(taskIdsTo, indexSource, indexDestination);
-
-                // apiUpdateTaskAndCategory(
-                //     projectId, categoryIdFrom, 
-                //     categoryIdTo, activeTaskId, activeTaskIds);
-    
-                dispatch(moveTaskToCategory({
-                    categoryIdFrom: categoryIdFrom, 
-                    categoryIdTo: categoryIdTo, 
-                    taskIdsFrom: activeTaskIds, 
-                    taskIdsTo: taskIds
-                }));
-            }
-    
-            // apiUpdateTaskAndCategory(
-            //     projectId, categoryIdFrom, categoryIdTo,
-            //     activeTaskId, [categoryIdFrom]);
-    
-            // check if the task is moved to another column and move
-            // the task to the new column
-            
-
-            dispatch(moveTaskToNewCategory({
-                categoryIdFrom: categoryIdFrom, 
-                categoryIdTo: categoryIdTo, 
-                taskId: activeTaskId
-            }));
-        }
-    };
 
     const handleOnDragOver = (e) => {
         console.log("drag over", e);
@@ -288,9 +203,6 @@ const Categories = ({projectId}) => {
             taskIdsTo = [...categories[categoryIdTo].tasks, activeTaskId];
             const taskIdsFromFiltered = taskIdsFrom.filter(taskId => taskId !== activeTaskId);
             
-            // apiUpdateTaskAndCategory(
-            //     projectId, categoryIdFrom, categoryIdTo, activeTaskId, taskIdsTo);
-
             setMoveTaskData({
                 categoryIdFrom, 
                 categoryIdTo, 
@@ -299,12 +211,6 @@ const Categories = ({projectId}) => {
                 taskIdsTo
             });
 
-            // dispatch(moveTaskToCategory({
-            //     categoryIdFrom: categoryIdFrom, 
-            //     categoryIdTo: categoryIdTo, 
-            //     taskIdsFrom: taskIdsFromFiltered, 
-            //     taskIdsTo
-            // }));
             return;
         }
         
@@ -325,9 +231,6 @@ const Categories = ({projectId}) => {
             taskIdsTo.splice(indexOverTask <= 0 ? 0 : indexOverTask, 0, activeTaskId);
             const taskIdsFromFiltered = taskIdsFrom.filter(taskId => taskId !== activeTaskId);
 
-            // apiUpdateTaskAndCategory(
-            //     projectId, categoryIdFrom, categoryIdTo, activeTaskId, taskIdsTo);
-
             setMoveTaskData({
                 categoryIdFrom, 
                 categoryIdTo, 
@@ -336,12 +239,6 @@ const Categories = ({projectId}) => {
                 taskIdsTo
             });
 
-            // dispatch(moveTaskToCategory({
-            //     categoryIdFrom: categoryIdFrom, 
-            //     categoryIdTo: categoryIdTo, 
-            //     taskIdsFrom: taskIdsFromFiltered,
-            //     taskIdsTo: taskIdsTo
-            // }));
             return;
         }
 
@@ -351,8 +248,6 @@ const Categories = ({projectId}) => {
         const indexOverTask = taskIdsTo.findIndex(taskId => taskId === overTaskId);
         const taskIds = arrayMove(taskIdsTo, indexActiveTask, indexOverTask);
 
-        // apiUpdateTaskAndCategory(projectId, categoryIdFrom, categoryIdTo, activeTaskId, taskIds);
-
         setMoveTaskData({
             categoryIdFrom, 
             categoryIdTo, 
@@ -360,12 +255,6 @@ const Categories = ({projectId}) => {
             taskIdsFrom: taskIds,
             taskIdsTo: taskIds
         });
-
-        // dispatch(moveTaskToCategory({
-        //     categoryIdFrom, 
-        //     categoryIdTo: categoryIdFrom, 
-        //     taskIdsTo: taskIds
-        // }));
 
         return;
     };

@@ -47,6 +47,7 @@ export const deleteProject = async (projectId) => {
 
 /**
  * Delete task
+ * This also deletes the task from the parent category
  * @param {string} projectId 
  * @param {string} categoryId 
  * @param {string} taskId 

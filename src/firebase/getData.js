@@ -47,7 +47,6 @@ export const getCategoriesAndTasks = async (projectId) => {
     try {
         const {categories, categoryIds} = await getCategories(projectId);
         const tasksAndCategories = await getTasksByCategory(projectId, categories);
-        console.log(categories, tasksAndCategories);
         return {
             id: projectId, 
             categoryIds,
@@ -66,15 +65,14 @@ export const getCategoriesAndTasks = async (projectId) => {
 /**
  * Get the categories
  * Returns a normalized object of category data (without
- * the tasks) and an object with categoryName - categoryId 
- * pairs
+ * the tasks) and a list of categories, in th order in
+ * which they will be displayed
  * @param {string} projectId 
- * @returns category data and an object with categoryName - 
- * categoryId pairs
+ * @returns category data and a list of categories, in 
+ * display order
  */
 const getCategories = async (projectId) => {
     const categories = {};
-    // const categoryIds = {};
     const categoryIds = [];
     const q = query(collection(
         db, ...dbCollectionNames.getCategoriesPath(projectId)));
@@ -83,9 +81,6 @@ const getCategories = async (projectId) => {
 
     snapshot.forEach((document) => {
         const documentData = document.data();
-        // categoryIds[documentData.name] = {
-        //     id: document.id
-        // };
         categoryIds.push(document.id);
         const categoryDetails = {
             "id": document.id, 
@@ -207,19 +202,6 @@ export const projectExists = async (projectId) => {
     return snapshot.exists();
 };
 
-
-/**
- * Get the category reference
- * @param {string} projectId 
- * @param {string} categoryId 
- * @returns category reference
- */
-export const getCategoryReference = async (projectId, categoryId) => {
-    const collectionPath = dbCollectionNames.categoryPath(projectId, categoryId);
-    const docRef = doc(db, ...collectionPath);
-    return await getDoc(docRef);
-};
-
 /**
  * Check if category exists
  * @param {string} projectId 
@@ -227,16 +209,7 @@ export const getCategoryReference = async (projectId, categoryId) => {
  * @returns true if category exists, false otherwise
  */
 export const categoryExists = async (projectId, categoryId) => {
-    return (await getCategoryReference(projectId, categoryId)).exists();
-};
-
-
-/**
- * Get the data of a given category
- * @param {string} projectId 
- * @param {string} categoryId 
- * @returns category data
- */
-export const getCategoryData = async (projectId, categoryId) => {
-    return (await getCategoryReference(projectId, categoryId)).data();
+    const collectionPath = dbCollectionNames.categoryPath(projectId, categoryId);
+    const docRef = doc(db, ...collectionPath);
+    return (await getDoc(docRef)).exists();
 };

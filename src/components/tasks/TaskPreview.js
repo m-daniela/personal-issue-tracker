@@ -1,7 +1,7 @@
 "use client";
 import { deleteTaskFromCategory, getTaskById } from "@/redux/features/categoriesSlice";
 import { apiUrls, routes, draggableStyle } from "@/utils/generalConstants";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import SnackbarWrapper from "../SnackbarWrapper";
@@ -22,7 +22,6 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
         isError: false
     });
     const task = useSelector(getTaskById(taskId));
-    // const task = useMemo(() => task, [task]);
     const dispatch = useDispatch();
 
     const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
@@ -33,8 +32,6 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
             categoryId
         }
     });
-
-    // console.log(memoizedTask);
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -48,7 +45,6 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
             method: "DELETE", 
         });
         const removedTask = await response.json();
-        console.log(removedTask);
         if (removedTask.error) {
             setMessage({
                 text: `Error while deleting the task: ${removedTask.error.message}`, 
@@ -75,9 +71,7 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
             }}
             {...attributes}
             {...listeners}
-        >
-
-        </div>);
+        />);
     }
 
     return (<>
