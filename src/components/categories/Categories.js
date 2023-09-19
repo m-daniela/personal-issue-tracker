@@ -1,21 +1,16 @@
 "use client";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import CategoryItem from "./CategoryItem";
 import { useDispatch, useSelector } from "react-redux";
 import { 
-    categoriesProjectIdSelector, 
     categoriesSelector, 
-    categoryIdsSelector,
     moveTaskToCategory,
-    moveTaskToNewCategory,
     updateCategoryOrder, 
-    updateTaskOrder
 } from "@/redux/features/categoriesSlice";
-import { SelectedProjectContext } from "../context/SelectedProjectProvider";
+import { useSelectedProjectContext } from "../context/SelectedProjectProvider";
 import { 
     projectById, 
-    projectSelectorById, 
     projectsSelector, 
     updateProject } from "@/redux/features/projectsSlice";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -29,12 +24,10 @@ import { apiUpdateProject, apiUpdateTaskAndCategory } from "../utils/apiCalls";
  * Display the list of categories
  */
 const Categories = ({projectId}) => {
-    const { handleSelectProject } = useContext(SelectedProjectContext);
+    const { selectedProject, handleSelectProject } = useSelectedProjectContext();
 
     const dispatch = useDispatch();
     const categories = useSelector(categoriesSelector);
-    // const categoriesIds = useSelector(categoryIdsSelector);
-    // const projectId = useSelector(categoriesProjectIdSelector);
     const project = projectById(projectId, useSelector(projectsSelector));
 
     const [activeCategory, setActiveCategory] = useState(null);
@@ -48,19 +41,15 @@ const Categories = ({projectId}) => {
     });
     const sensors = useSensors(pointerSensor);
 
-    // useEffect(() => {
-    //     handleSelectProject(project);
-    // }, [project]);
+    useEffect(() => {
+        handleSelectProject(project);
+    }, [project, handleSelectProject]);
 
 
-    if (!project){
-        return <p>loading</p>;
+    if (!selectedProject){
+        return <p>loading project</p>;
     }
     const categoriesIds = project.category_order;
-
-    if (!categoriesIds){
-        return <p>loading</p>;
-    }
 
     // TODO: overlay is not displaying anymore when moving 
     // TODO: over another category

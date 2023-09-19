@@ -34,14 +34,14 @@ const fetchProjects = async () => {
 
 export default async function Home() {
 
-    const projects = await fetchProjects();
-    if(projects.error){
-        throw new APIResponseError(projects.error.message);
-        // notFound();
-    }
+    // const projects = await fetchProjects();
+    // if(projects.error){
+    //     throw new APIResponseError(projects.error.message);
+    //     // notFound();
+    // }
     return (
         <>
-            <ProjectsPreloader data={projects}/>
+            {/* <ProjectsPreloader data={projects}/> */}
             <section>
                 <PageHeader title="Projects"/>
                 <AddProject />
