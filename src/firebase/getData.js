@@ -12,7 +12,7 @@ import { doc, getDoc, collection, query, getDocs, orderBy } from "firebase/fires
  */
 export const getProjects = async () => {
     const projects = [];
-    const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at"));
+    const q = query(collection(db, dbCollectionNames.projectsPath), orderBy("created_at", "desc"));
 
     const snapshot = await getDocs(q);
 
@@ -47,6 +47,7 @@ export const getCategoriesAndTasks = async (projectId) => {
     try {
         const {categories, categoryIds} = await getCategories(projectId);
         const tasksAndCategories = await getTasksByCategory(projectId, categories);
+        console.log(categories, tasksAndCategories);
         return {
             id: projectId, 
             categoryIds,
@@ -76,8 +77,7 @@ const getCategories = async (projectId) => {
     // const categoryIds = {};
     const categoryIds = [];
     const q = query(collection(
-        db, ...dbCollectionNames.getCategoriesPath(projectId)), 
-    orderBy("order_no"));
+        db, ...dbCollectionNames.getCategoriesPath(projectId)));
 
     const snapshot = await getDocs(q);
 
@@ -89,8 +89,7 @@ const getCategories = async (projectId) => {
         categoryIds.push(document.id);
         const categoryDetails = {
             "id": document.id, 
-            ...documentData, 
-            tasks: []
+            ...documentData
         };
         categories[document.id] = categoryDetails;
     });
@@ -115,7 +114,6 @@ const getCategories = async (projectId) => {
 export const getTasksByCategory = async (projectId, categories) => {
     const normalizedTasks = {};
     for (const categoryId in categories){
-        const tasks = [];
         const q = query(
             collection(db, ...dbCollectionNames.tasksPath(
                 projectId, categoryId)), orderBy("created_at"));
@@ -128,9 +126,7 @@ export const getTasksByCategory = async (projectId, categories) => {
                 "id": taskId, 
                 ...taskData
             };
-            tasks.push(taskId);
         });
-        categories[categoryId].tasks = tasks;
     }
 
     return {
@@ -213,14 +209,34 @@ export const projectExists = async (projectId) => {
 
 
 /**
+ * Get the category reference
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @returns category reference
+ */
+export const getCategoryReference = async (projectId, categoryId) => {
+    const collectionPath = dbCollectionNames.categoryPath(projectId, categoryId);
+    const docRef = doc(db, ...collectionPath);
+    return await getDoc(docRef);
+};
+
+/**
  * Check if category exists
  * @param {string} projectId 
  * @param {string} categoryId 
  * @returns true if category exists, false otherwise
  */
 export const categoryExists = async (projectId, categoryId) => {
-    const collectionPath = dbCollectionNames.categoryPath(projectId, categoryId);
-    const docRef = doc(db, ...collectionPath);
-    const snapshot = await getDoc(docRef);
-    return snapshot.exists();
+    return (await getCategoryReference(projectId, categoryId)).exists();
+};
+
+
+/**
+ * Get the data of a given category
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @returns category data
+ */
+export const getCategoryData = async (projectId, categoryId) => {
+    return (await getCategoryReference(projectId, categoryId)).data();
 };

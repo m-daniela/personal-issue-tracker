@@ -11,7 +11,7 @@ const Navbar = () => {
         <nav>
             <Link href={routes.mainPage}>Home</Link>
             {
-                selectedProject.id 
+                selectedProject
                 && 
                 <Link href={routes.projectRoute(selectedProject.id)}>{selectedProject.name}</Link>
             }

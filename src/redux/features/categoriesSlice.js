@@ -23,36 +23,27 @@ export const categoriesSliceActuallyNormalized = createSlice({
             const task = action.payload.task;
             state.tasks[task.id] = task;
         }, 
-        moveTaskToNewCategory: (state, action) => {
-            const {categoryIdFrom, categoryIdTo, taskId} = action.payload;
-            state.categories[categoryIdTo].tasks.push(taskId);
-            state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks.filter(
-                currentTaskId => currentTaskId !== taskId);
-        }, 
         updateCategoryOrder: (state, action) => {
             return {
                 ...state, 
                 categoryIds: action.payload
             };
         },
-        updateTaskOrder: (state, action) => {
-            const {categoryId, taskIds} = action.payload;
-            return {
-                ...state, 
-                categories: {
-                    ...state.categories,
-                    [categoryId]: {
-                        ...state.categories[categoryId], 
-                        tasks: taskIds
-                    }
-                }
-            };
-        },
         moveTaskToCategory: (state, action) => {
             const {categoryIdFrom, categoryIdTo, taskIdsFrom, taskIdsTo} = action.payload;
-            // state.categories[categoryIdTo].tasks.push(taskId);
-            // state.categories[categoryIdFrom].tasks = state.categories[categoryIdFrom].tasks
-            // .filter(currentTaskId => currentTaskId !== taskId);
+
+            if (categoryIdFrom === categoryIdTo) {
+                return {
+                    ...state, 
+                    categories: {
+                        ...state.categories,
+                        [categoryIdFrom]: {
+                            ...state.categories[categoryIdFrom], 
+                            tasks: taskIdsTo
+                        }
+                    }
+                };
+            }
             return {
                 ...state, 
                 categories: {

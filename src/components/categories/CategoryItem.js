@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import TaskPreview from "../tasks/TaskPreview";
 import Link from "next/link";
-import { routes } from "@/utils/generalConstants";
+import { routes, draggableStyle } from "@/utils/generalConstants";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import { useSortable } from "@dnd-kit/sortable";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
@@ -25,7 +25,7 @@ const CategoryItem = ({category, projectId}) => {
     const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
         id: category.id, 
         data: {
-            type: "Column", 
+            type: "category", 
             category
         }
     });
@@ -38,7 +38,10 @@ const CategoryItem = ({category, projectId}) => {
 
     if (isDragging){
         return (<div className="category-item" ref={setNodeRef}
-            style={style}
+            style={{
+                ...style, 
+                ...draggableStyle
+            }}
             {...attributes}
             {...listeners}>
            
@@ -54,13 +57,12 @@ const CategoryItem = ({category, projectId}) => {
                 <AddOutlinedIcon />Add task
             </Link>
             <SortableContext items={tasksIds}>
-                {Object.values(category.tasks)?.map(taskId => <TaskPreview 
+                {tasksIds?.map(taskId => <TaskPreview 
                     key={taskId}
                     projectId={projectId} 
                     categoryId={category.id} 
                     taskId={taskId} />)}
             </SortableContext>
-                
         </div>
     );
 };
