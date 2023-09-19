@@ -36,6 +36,43 @@ export const updateProject = async (projectId, projectData) => {
 
 
 /**
+ * Update the category array of the project
+ * The category id will be added or removed based on the value
+ * of the addCategory parameter 
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @param {string} taskId 
+ * @param {boolean} addTask 
+ * @returns success message if the category array was updated, 
+ * error message otherwise
+ */
+export const updateProjectCategoryArray = async (projectId, categoryId, addCategory) => {
+    const project = doc(db, ...dbCollectionNames.projectPath(projectId));
+    try{
+        if (addCategory) {
+            await updateDoc(project, {
+                category_order: arrayUnion(categoryId), 
+                updated_at: Timestamp.fromDate(new Date())
+            });
+        }
+        else {
+            await updateDoc(project, {
+                category_order: arrayRemove(categoryId), 
+                updated_at: Timestamp.fromDate(new Date())
+            });
+        }
+        return {
+            success: {
+                message: `Category list updated for project ${projectId}`
+            }
+        };
+    }
+    catch (error){
+        return errorMessageBuilder(`Could not update project ${categoryId}.`, error.message);
+    }
+};
+
+/**
  * Update the category
  * @param {string} projectId 
  * @param {string} categoryId 
