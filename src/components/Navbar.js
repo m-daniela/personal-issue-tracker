@@ -2,11 +2,11 @@
 
 import { routes } from "@/utils/generalConstants";
 import Link from "next/link";
-import React, { useContext } from "react";
-import { SelectedProjectContext } from "./context/SelectedProjectProvider";
+import React from "react";
+import { useSelectedProjectContext } from "./context/SelectedProjectProvider";
 
 const Navbar = () => {
-    const {selectedProject} = useContext(SelectedProjectContext);
+    const {selectedProject} = useSelectedProjectContext();
     return (
         <nav>
             <Link href={routes.mainPage}>Home</Link>

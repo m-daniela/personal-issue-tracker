@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import ProjectItem from "./ProjectItem";
 import { useSelector } from "react-redux";
 import { projectsSelector } from "@/redux/features/projectsSlice";
-import { SelectedProjectContext } from "../context/SelectedProjectProvider";
+import { useSelectedProjectContext } from "../context/SelectedProjectProvider";
 
 
 /**
@@ -12,11 +12,11 @@ import { SelectedProjectContext } from "../context/SelectedProjectProvider";
  */
 const Projects = () => {
     const projects = useSelector(projectsSelector);
-    const {handleSelectProject} = useContext(SelectedProjectContext);
+    const {handleSelectProject} = useSelectedProjectContext();
     // reset the selected project
     useEffect(() => {
-        handleSelectProject({});
-    }, []);
+        handleSelectProject(null);
+    }, [handleSelectProject]);
     
     return (
         <section className="projects">
