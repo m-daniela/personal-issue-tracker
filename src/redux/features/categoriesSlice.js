@@ -8,6 +8,30 @@ export const categoriesSliceActuallyNormalized = createSlice({
     initialState, 
     reducers: {
         setCategories: (state, action) => action.payload, 
+        addCategory: (state, action) => {
+            const {categoryId, categoryData} = action.payload;
+            return {
+                ...state, 
+                categories: {
+                    ...state.categories, 
+                    [categoryId]: categoryData
+                },
+                categoryIds: [...state.categoryIds, categoryId]
+            };
+        },
+        updateCategory: (state, action) => {
+            // state.categories[action.payload.id] = action.payload;
+            return {
+                ...state, 
+                categories: {
+                    ...state.categories,
+                    [action.payload.id]: action.payload
+                }
+            };
+        },
+        deleteCategory: (state, action) => {
+
+        },
         addTaskToCategory: (state, action) => {
             const categoryId = action.payload.categoryId;
             const task = action.payload.task;
@@ -78,7 +102,10 @@ export const {
     moveTaskToCategory,
     moveTaskToNewCategory,
     updateCategoryOrder,
-    updateTaskOrder
+    updateTaskOrder,
+    addCategory, 
+    updateCategory, 
+    deleteCategory
 } = categoriesSliceActuallyNormalized.actions;
 
 export default categoriesSliceActuallyNormalized.reducer;

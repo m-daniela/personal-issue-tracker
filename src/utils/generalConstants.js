@@ -9,6 +9,11 @@ export const apiUrls = {
     getCategoriesAndTasks: (projectId) => `${mainUrlApi}projects/${projectId}/tasks`,
     getTask: (projectId, categoryId, taskId) => `${mainUrlApi}projects/${projectId}` +
     `/category/${categoryId}/task/${taskId}`,
+    createCategory: (projectId) => `${mainUrlApi}projects/${projectId}/category`,
+    updateCategory: (projectId, categoryId) => `${mainUrlApi}projects/${projectId}` + 
+    `/category/${categoryId}`,
+    deleteCategory: (projectId, categoryId) => `${mainUrlApi}projects/${projectId}` + 
+    `/category/${categoryId}`,
     addTask: (projectId, categoryId) => `${mainUrlApi}projects/${projectId}` + 
     `/category/${categoryId}/task`,
     updateTask: (projectId, categoryId, taskId) => `${mainUrlApi}projects/${projectId}` +

@@ -3,6 +3,7 @@ import { apiUrls } from "@/utils/generalConstants";
 import React from "react";
 import CategoriesPreloader from "@/components/preloaders/CategoriesPreloader";
 import PageHeader from "@/components/PageHeader";
+import AddCategory from "@/components/categories/AddCategory";
 
 
 export const metadata = {
@@ -23,6 +24,7 @@ const ProjectPage = async ({params}) => {
         <section>
             <PageHeader title="Your tasks" />
             <CategoriesPreloader data={data} />
+            <AddCategory projectId={projectId} />
             <Categories projectId={projectId} />
         </section>
     );

@@ -13,6 +13,7 @@ import { deleteTask } from "./deleteData";
  * @returns updated project data
  */
 export const updateProject = async (projectId, projectData) => {
+    console.log(projectId);
     const project = doc(db, ...dbCollectionNames.updateProjectPath(projectId));
     
     const projectDataWithTimestamps = {
