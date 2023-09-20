@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import CategoryItem from "./CategoryItem";
 import { useDispatch, useSelector } from "react-redux";
 import { 
@@ -12,7 +12,8 @@ import { useSelectedProjectContext } from "../context/SelectedProjectProvider";
 import { 
     projectById, 
     projectsSelector, 
-    updateProject } from "@/redux/features/projectsSlice";
+    updateProject, 
+    useProjectSelectorById} from "@/redux/features/projectsSlice";
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
@@ -28,7 +29,9 @@ const Categories = ({projectId}) => {
 
     const dispatch = useDispatch();
     const categories = useSelector(categoriesSelector);
-    const project = projectById(projectId, useSelector(projectsSelector));
+    // const project = projectById(projectId, useSelector(projectsSelector));
+    const project = useProjectSelectorById(projectId);
+    const categoriesIds = useMemo(() => project ? project.category_order : [], [project]);
 
     const [activeCategory, setActiveCategory] = useState(null);
     const [activeTask, setActiveTask] = useState(null);
@@ -49,7 +52,7 @@ const Categories = ({projectId}) => {
     if (!selectedProject){
         return <p>loading project</p>;
     }
-    const categoriesIds = project.category_order;
+    // const categoriesIds = project.category_order;
 
     // TODO: overlay is not displaying anymore when moving 
     // TODO: over another category
