@@ -2,7 +2,12 @@ import db from "@/firebase/config";
 import { dbCollectionNames, defaultCategories, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, addDoc, collection, Timestamp, writeBatch, setDoc } from "firebase/firestore"; 
 import { categoryExists, projectExists } from "./getData";
-import { updateCategory, updateCategoryTaskArray, updateProject } from "./updateData";
+import { 
+    updateCategory, 
+    updateCategoryTaskArray, 
+    updateProject, 
+    updateProjectCategoryArray 
+} from "./updateData";
 
 
 /**
@@ -54,6 +59,43 @@ export const addProject = async (projectData) => {
         return errorMessageBuilder(error.message ? error.message : JSON.stringify(error));
     }
     
+};
+
+
+/**
+ * Add a new category
+ * The new category id is also added in the project's
+ * category_order list, as the last element
+ * @param {string} projectId 
+ * @param {object} categoryData 
+ * @returns new category data
+ */
+export const addCategory = async (projectId, categoryData) => {
+    const isProject = await projectExists(projectId);
+    if (!isProject){
+        return errorMessageBuilder(`Could not retrieve project ${projectId}.`);
+    }
+
+    const categoryDataWithTimestamps = {
+        ...categoryData, 
+        tasks: [],
+        created_at: Timestamp.fromDate(new Date()), 
+        updated_at: Timestamp.fromDate(new Date()), 
+    };
+    
+    const newCategory = await addDoc(
+        collection(db, ...dbCollectionNames.categoriesPath(projectId)), categoryDataWithTimestamps);
+    
+    // add the category id to the project's category_order list
+    const updateProjectMessage = await updateProjectCategoryArray(projectId, newCategory.id, true);
+    if (updateProjectMessage.error){
+        return updateProjectMessage;
+    }
+
+    return {
+        id: newCategory.id,
+        ...categoryDataWithTimestamps
+    };
 };
 
 

@@ -5,21 +5,56 @@
     // flex-wrap: nowrap;
     overflow-x: scroll;
 
-    h2{
+    div.controls {
+        display: flex;
+        flex-direction: row;
+        box-sizing: border-box;
         margin-bottom: .7em;
+        button {
+            opacity: 0;
+        }
+       
+        h2{
+            display: inline-block;
+            overflow-wrap: break-word;
+            white-space: wrap;
+        }
+        &:hover {
+            button {
+                opacity: 1;
+                transition: 1s ease-in-out;
+            }
+            h2, input{
+                flex-grow: 3;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                transition: 1s ease-in-out;
+            }
+        }
+    }
+
+    form.controls {
+        display: flex;
+        flex-direction: row;
+        box-sizing: border-box;
+        margin-bottom: .7em;
+        input{
+            overflow: hidden;
+        }
     }
 
     .category-item {
-        min-width: 200px;
-        max-width: 200px;
+        min-width: 250px;
+        max-width: 250px;
+        box-sizing: border-box;
         // background-color: var(--accent-color);
         border-radius: var(--border-radius);
         margin: 0 .4em;
         padding: 1em;
         flex-grow: 1;
-        h2 {
-            white-space: nowrap;
-        }
+        // h2 {
+        //     white-space: nowrap;
+        // }
     }
     .add-task-link{
         @include hover;

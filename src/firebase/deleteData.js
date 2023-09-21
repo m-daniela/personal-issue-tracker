@@ -2,13 +2,13 @@ import db from "@/firebase/config";
 import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, deleteDoc, writeBatch } from "firebase/firestore";
 import { 
-    getCategoryIdsFromProject, 
-    getTaskIdsFromCategory, 
     categoryExists, 
     projectExists, 
-    getTask 
+    getTask, 
+    getCategory,
+    getProject
 } from "./getData";
-import { updateCategoryTaskArray } from "./updateData";
+import { updateCategoryTaskArray, updateProjectCategoryArray } from "./updateData";
 
 
 /**
@@ -19,28 +19,70 @@ import { updateCategoryTaskArray } from "./updateData";
  * @returns id of the deleted project
  */
 export const deleteProject = async (projectId) => {
-    const isProject = await projectExists(projectId);
-    if (!isProject) {
+    const project = await getProject(projectId);
+    if (!project) {
         return errorMessageBuilder(`Could not find project ${projectId}.`);
     }
 
-    const categoryIds = await getCategoryIdsFromProject(projectId);
+    const categoryIds = project.category_order;
 
     categoryIds.forEach(async (categoryId) => {
         const batch = writeBatch(db);
-        const taskIds = await getTaskIdsFromCategory(projectId, categoryId);
-        taskIds.forEach(taskId => {
-            batch.delete(doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId)));
-        });
-        await batch.commit();
-
-        await deleteDoc(doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId)));
+        const category = await getCategory(projectId, categoryId);
+        if (category){
+            const taskIds = category.tasks;
+            taskIds.forEach(taskId => {
+                batch.delete(doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId)));
+            });
+            await batch.commit();
+    
+            await deleteDoc(doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId)));
+        }
     });
 
     await deleteDoc(doc(db, ...dbCollectionNames.projectPath(projectId)));
     
     return {
         id: projectId
+    };
+};
+
+
+/**
+ * Delete category and associated tasks
+ * The category id is deleted from the project's
+ * category_order array before it is deleted
+ * @param {string} projectId 
+ * @param {string} categoryId 
+ * @returns id of the deleted category
+ */
+export const deleteCategory = async (projectId, categoryId) => {
+    const isProject = await projectExists(projectId);
+    const category = await getCategory(projectId, categoryId);
+    if (!isProject) {
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
+    }
+    if (!category){
+        return errorMessageBuilder(`Could not find category ${categoryId}.`);
+    }
+
+    const taskIds = category.tasks;
+    const batch = writeBatch(db);
+
+    taskIds.forEach(taskId => {
+        batch.delete(doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId)));
+    });
+    await batch.commit();
+
+    // remove category from project, so it won't be displayed
+    const updateProjectMessage = await updateProjectCategoryArray(projectId, categoryId, false);
+    if (updateProjectMessage.error){
+        return updateProjectMessage;
+    }
+
+    await deleteDoc(doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId)));
+    return {
+        id: categoryId
     };
 };
 

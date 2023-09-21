@@ -1,41 +1,43 @@
 "use client";
 
-import { addProject } from "@/redux/features/projectsSlice";
 import { apiUrls } from "@/utils/generalConstants";
 import React, {useState} from "react";
 import { useDispatch } from "react-redux";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import SnackbarWrapper from "../SnackbarWrapper";
+import { updateProject, useProjectSelectorById } from "@/redux/features/projectsSlice";
+import { addCategory } from "@/redux/features/categoriesSlice";
 
 
 /**
- * Add project
+ * Add category
  */
-const AddProject = () => {
+const AddCategory = ({projectId}) => {
     const dispatch = useDispatch();
+    const project = useProjectSelectorById(projectId);
     const [open, setOpen] = useState(true);
     const [message, setMessage] = useState({
         text: "", 
         isError: false
     });
 
-    const handleSumbitProject = async (e) => {
+    const handleSumbitCategory = async (e) => {
         e.preventDefault();
-        const projectName = e.target[0].value;
+        const categoryName = e.target[0].value;
         const response = await fetch(
-            apiUrls.createProject, 
+            apiUrls.createCategory(projectId), 
             {
                 method: "POST",
                 headers: {
                     "Content-type": "application/json",
                 },
-                body: JSON.stringify({name: projectName})
+                body: JSON.stringify({name: categoryName})
             });
-        const project = await response.json();
+        const categoryData = await response.json();
 
-        if (project.error){
+        if (categoryData.error){
             setMessage({
-                text: `Error while adding the project: ${project.error.message}`, 
+                text: `Error while adding the category: ${categoryData.error.message}`, 
                 isError: true
             });
             setOpen(true);
@@ -47,15 +49,21 @@ const AddProject = () => {
             });
             setOpen(false);
             e.target[0].value = "";
-            dispatch(addProject(project));
+            const updatedProject = {
+                ...project, 
+                category_order: [...project.category_order, categoryData.id]
+            };
+
+            dispatch(addCategory({categoryId: categoryData.id, categoryData}));
+            dispatch(updateProject(updatedProject));
         }
     };
 
     return (
         <>
             <section className="add-element">
-                <form onSubmit={handleSumbitProject}>
-                    <input type="text" placeholder="Project name..." />
+                <form onSubmit={handleSumbitCategory}>
+                    <input type="text" placeholder="Category name..." />
                     <button type="submit"><AddOutlinedIcon /></button>
                 </form>
             </section>
@@ -67,4 +75,4 @@ const AddProject = () => {
     );
 };
 
-export default AddProject;
+export default AddCategory;
