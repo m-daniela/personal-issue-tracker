@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import SnackbarWrapper from "../SnackbarWrapper";
+import { TaskLabelDeletable } from "./TaskLabels";
 
 
 /**
@@ -22,6 +23,8 @@ const AddTask = ({projectId, categoryId}) => {
     const dispatch = useDispatch();
     const router = useRouter();
     const [open, setOpen] = useState(true);
+    const [labels, setLabels] = useState([]);
+    const [label, setLabel] = useState("");
     const [message, setMessage] = useState({
         text: "", 
         isError: false
@@ -33,7 +36,7 @@ const AddTask = ({projectId, categoryId}) => {
             name: e.target[0].value,
             description: e.target[1].value,
             notes: e.target[2].value,
-            labels: [],
+            labels,
         };
         const response = await fetch(
             apiUrls.addTask(projectId, categoryId), 
@@ -63,6 +66,20 @@ const AddTask = ({projectId, categoryId}) => {
         }
     };
 
+    const handleDeleteLabel = (labelName) => () => {
+        console.log(labelName);
+        setLabels(state => {
+            return state.filter(label => label !== labelName);
+        });
+    };
+
+    const handleAddLabel = (e) => {
+        e.preventDefault();
+        // console.log(e.target);
+        setLabels(state => [...state, label]);
+        setLabel("");
+    };
+
     const handleBack = (e) => {
         e.preventDefault();
         // store.dispatch(setCategories(categories));
@@ -81,6 +98,25 @@ const AddTask = ({projectId, categoryId}) => {
                 <label>Notes</label>
                 <textarea />
 
+                <label>Labels</label>
+                <div className="task-labels">
+                    {
+                        labels.map((label, index) => <TaskLabelDeletable 
+                            key={index}
+                            label={label} 
+                            handleDeleteLabel={handleDeleteLabel} />)
+                    }
+                </div>
+                <div className="labels-controls">
+                    <input 
+                        type="text" 
+                        placeholder="Label name..." 
+                        value={label} 
+                        onChange={e => setLabel(e.target.value)}/>
+                    <button 
+                        className="primary" 
+                        onClick={handleAddLabel}>Add label</button>
+                </div>
                 <div className="controls">
                     <button className="secondary">
                         <Link href={routes.projectRoute(projectId)}>Go back</Link>
