@@ -130,11 +130,34 @@ export const getTasksByCategory = async (projectId, categories) => {
     };
 };
 
+
+/**
+ * Get project
+ * @param {string} projectId 
+ * @returns object with project data | null
+ */
+export const getProject = async (projectId) => {
+    const collectionPath = dbCollectionNames.projectPath(
+        projectId);
+    const docRef = doc(db, ...collectionPath);
+    const snapshot = await getDoc(docRef);
+
+    if (snapshot.exists()) {
+        const project = {
+            id: snapshot.id, 
+            ...snapshot.data()
+        };
+        return project;
+    }
+    return null;
+};
+
+
 /**
  * Get category
  * @param {string} projectId 
  * @param {string} categoryId 
- * @returns object with category data
+ * @returns object with category data | null
  */
 export const getCategory = async (projectId, categoryId) => {
     const collectionPath = dbCollectionNames.categoryPath(
@@ -148,9 +171,8 @@ export const getCategory = async (projectId, categoryId) => {
             ...snapshot.data()
         };
         return category;
-    } else {
-        return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
-    }
+    } 
+    return null;
 };
 
 
@@ -176,40 +198,6 @@ export const getTask = async (projectId, categoryId, taskId) => {
     } else {
         return errorMessageBuilder(`Could not retrieve task ${taskId}.`);
     }
-};
-
-
-/**
- * Get the ids of the category in the given project
- * @param {string} projectId 
- * @param {string} categoryId 
- * @returns list of category ids from the project
- */
-export const getCategoryIdsFromProject = async (projectId) => {
-    const categoryIds = [];
-    const q = query(collection(db, ...dbCollectionNames.categoriesPath(projectId)));
-    const snapshot = await getDocs(q);
-
-    snapshot.forEach((document) => categoryIds.push(document.id));
-
-    return categoryIds;
-};
-
-
-/**
- * Get the ids of the tasks in the given category
- * @param {string} projectId 
- * @param {string} categoryId 
- * @returns list of task ids from the category
- */
-export const getTaskIdsFromCategory = async (projectId, categoryId) => {
-    const taskIds = [];
-    const q = query(collection(db, ...dbCollectionNames.tasksPath(projectId, categoryId)));
-    const snapshot = await getDocs(q);
-
-    snapshot.forEach((document) => taskIds.push(document.id));
-
-    return taskIds;
 };
 
 

@@ -2,7 +2,7 @@ import db from "@/firebase/config";
 import { dbCollectionNames, errorMessageBuilder } from "@/utils/dbConstants";
 import { doc, updateDoc, Timestamp, arrayRemove, arrayUnion } from "firebase/firestore";
 import { categoryExists, getTask, projectExists } from "./getData";
-import { addTask, addTaskToCategory } from "./addData";
+import { addTaskToCategory } from "./addData";
 import { deleteTask } from "./deleteData";
 
 /**
@@ -73,6 +73,7 @@ export const updateProjectCategoryArray = async (projectId, categoryId, addCateg
     }
 };
 
+
 /**
  * Update the category
  * @param {string} projectId 
@@ -81,16 +82,6 @@ export const updateProjectCategoryArray = async (projectId, categoryId, addCateg
  * @returns updated category
  */
 export const updateCategory = async (projectId, categoryId, categoryData) => {
-    const category = doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId));
-    const categoryDataWithTimestamps = {
-        ...categoryData, 
-        updated_at: Timestamp.fromDate(new Date())
-    };
-    
-    const categoryDataToUpdate = {...categoryDataWithTimestamps};
-    delete categoryDataToUpdate.id;
-    delete categoryDataToUpdate.created_at;
-
     const isProject = await projectExists(projectId);
     const isCategory = await categoryExists(projectId, categoryId);
 
@@ -100,6 +91,16 @@ export const updateCategory = async (projectId, categoryId, categoryData) => {
     if (!isCategory){
         return errorMessageBuilder(`Could not find category ${categoryId}.`);
     }
+
+    const category = doc(db, ...dbCollectionNames.categoryPath(projectId, categoryId));
+    const categoryDataWithTimestamps = {
+        ...categoryData, 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    
+    const categoryDataToUpdate = {...categoryDataWithTimestamps};
+    delete categoryDataToUpdate.id;
+    delete categoryDataToUpdate.created_at;
 
     try{
         await updateDoc(category, categoryDataToUpdate);
@@ -157,6 +158,15 @@ export const updateCategoryTaskArray = async (projectId, categoryId, taskId, add
  * @returns updated task data
  */
 export const updateTask = async (projectId, categoryId, taskId, taskData) => {
+    const isProject = await projectExists(projectId);
+    const isCategory = await categoryExists(projectId, categoryId);
+    if (!isProject){
+        return errorMessageBuilder(`Could not find project ${projectId}.`);
+    }
+    if (!isCategory){
+        return errorMessageBuilder(`Could not find category ${categoryId}.`);
+    }
+
     const task = doc(db, ...dbCollectionNames.taskPath(projectId, categoryId, taskId));
     const taskDataWithTimestamps = {
         ...taskData, 
@@ -166,16 +176,6 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
     const taskDataToUpdate = {...taskDataWithTimestamps};
     delete taskDataToUpdate.id;
     delete taskDataToUpdate.created_at;
-
-    const isProject = await projectExists(projectId);
-    const isCategory = await categoryExists(projectId, categoryId);
-
-    if (!isProject){
-        return errorMessageBuilder(`Could not find project ${projectId}.`);
-    }
-    if (!isCategory){
-        return errorMessageBuilder(`Could not find category ${categoryId}.`);
-    }
 
     try{
         await updateDoc(task, taskDataToUpdate);
@@ -199,11 +199,6 @@ export const updateTask = async (projectId, categoryId, taskId, taskData) => {
  */
 export const updateTaskCategory = async (
     projectId, categoryIdFrom, categoryIdTo, taskId, taskIds) => {
-    const task = await getTask(projectId, categoryIdFrom, taskId);
-    const taskDataWithTimestamps = {
-        ...task, 
-        updated_at: Timestamp.fromDate(new Date())
-    };
     const isProject = await projectExists(projectId);
     const isCategoryFrom = await categoryExists(projectId, categoryIdFrom);
     const isCategoryTo = await categoryExists(projectId, categoryIdTo);
@@ -213,6 +208,13 @@ export const updateTaskCategory = async (
     if (!isCategoryFrom && !isCategoryTo){
         return errorMessageBuilder(`Could not find category ${categoryIdFrom} or ${categoryIdTo}.`);
     }
+
+    const task = await getTask(projectId, categoryIdFrom, taskId);
+    const taskDataWithTimestamps = {
+        ...task, 
+        updated_at: Timestamp.fromDate(new Date())
+    };
+    
     try{
         if (categoryIdFrom === categoryIdTo){
             await updateCategory(projectId, categoryIdFrom, {tasks: taskIds});

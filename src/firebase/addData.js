@@ -71,17 +71,17 @@ export const addProject = async (projectData) => {
  * @returns new category data
  */
 export const addCategory = async (projectId, categoryData) => {
+    const isProject = await projectExists(projectId);
+    if (!isProject){
+        return errorMessageBuilder(`Could not retrieve project ${projectId}.`);
+    }
+
     const categoryDataWithTimestamps = {
         ...categoryData, 
         tasks: [],
         created_at: Timestamp.fromDate(new Date()), 
         updated_at: Timestamp.fromDate(new Date()), 
     };
-
-    const isProject = await projectExists(projectId);
-    if (!isProject){
-        return errorMessageBuilder(`Could not retrieve project ${projectId}.`);
-    }
     
     const newCategory = await addDoc(
         collection(db, ...dbCollectionNames.categoriesPath(projectId)), categoryDataWithTimestamps);
