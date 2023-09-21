@@ -82,3 +82,23 @@
         margin-right: 0;
     }
 }
+
+.task-labels {
+    div {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+.labels-controls {
+    margin-top: .7em;
+    input {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    button {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        padding-bottom: 8px        
+    }
+}

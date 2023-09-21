@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import SnackbarWrapper from "../SnackbarWrapper";
+import { TaskLabelSimple } from "./TaskLabels";
 import Link from "next/link";
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
@@ -87,6 +88,13 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
                     <span className="delete-button" onClick={handleDelete}>
                         <DeleteOutlineOutlinedIcon />
                     </span>
+                </div>
+                <div className="task-labels">
+                    {
+                        task.labels.map((label, index) => <TaskLabelSimple 
+                            key={index} 
+                            label={label}/>)
+                    }
                 </div>
                 <div>{task.description}
                     {/* <div className="overlay"></div> */}
