@@ -12,3 +12,11 @@ export class SelectedProjectError extends Error {
         this.name = "SelectedProjectError";
     }
 }
+
+
+export class FilterError extends Error {
+    constructor (message){
+        super(message);
+        this.name = "FilterError";
+    }
+}
