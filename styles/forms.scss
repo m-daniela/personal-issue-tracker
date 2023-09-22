@@ -12,10 +12,16 @@ form {
     }
 }
 
+label {
+    color: var(--accent-color);
+    margin-bottom: .5em;
+    font-size: .8em;
+}
+
 input, textarea, select {
     @include border_bottom;
     background-color: var(--accent-color-input);
-    padding: 5px 7px;
+    padding: 7px 10px;
 }
 
 input, textarea, select {

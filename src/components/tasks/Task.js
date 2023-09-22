@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PageHeader from "../PageHeader";
 import SnackbarWrapper from "../SnackbarWrapper";
+import { TaskLabelSimple, TaskLabelDeletable } from "./TaskLabels";
 
 
 /**
@@ -30,10 +31,13 @@ const Task = ({projectId, categoryId, taskData}) => {
     const [updateOn, setUpdateOn] = useState(false);
     const [task, setTask] = useState(taskData);
     const [open, setOpen] = useState(true);
+    const [label, setLabel] = useState("");
     const [message, setMessage] = useState({
         text: "", 
         isError: false
     });
+
+    console.log(task);
 
     const handleOnClose = (e) => {
         e.preventDefault();
@@ -48,6 +52,27 @@ const Task = ({projectId, categoryId, taskData}) => {
                 ...state,
                 [e.target.id]: e.target.value
             };});
+    };
+
+    const handleDeleteLabel = (labelName) => () => {
+        console.log(labelName);
+        setTask(state => {
+            return {
+                ...state, 
+                labels: state.labels.filter(label => label !== labelName)
+            };
+        });
+    };
+
+    const handleAddLabel = (e) => {
+        e.preventDefault();
+        setTask(state => {
+            return {
+                ...state, 
+                labels: [...state.labels, label]
+            };
+        });
+        setLabel("");
     };
 
     const handleSubmitUpdate = async (e) => {
@@ -82,7 +107,6 @@ const Task = ({projectId, categoryId, taskData}) => {
 
     return (
         <>
-        
             <section className="task">
                 {
                     updateOn ? 
@@ -107,6 +131,27 @@ const Task = ({projectId, categoryId, taskData}) => {
                                     id="notes" 
                                     onChange={handleOnChange} 
                                     value={task.notes} />
+
+
+                                <label>Labels</label>
+                                <div className="task-labels">
+                                    {
+                                        task.labels.map((label, index) => <TaskLabelDeletable 
+                                            key={index}
+                                            label={label} 
+                                            handleDeleteLabel={handleDeleteLabel} />)
+                                    }
+                                </div>
+                                <div className="labels-controls">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Label name..." 
+                                        value={label} 
+                                        onChange={e => setLabel(e.target.value)}/>
+                                    <button 
+                                        className="primary" 
+                                        onClick={handleAddLabel}>Add label</button>
+                                </div>
                                 <div className="controls">
                                     <button 
                                         className="secondary" 
@@ -123,10 +168,19 @@ const Task = ({projectId, categoryId, taskData}) => {
                                 <button onClick={() => setUpdateOn(state => !state)}>
                                     <EditOutlinedIcon /></button>
                             </div>
+                            <div className="task-labels">
+                                {
+                                    task.labels.map((label, index) => <TaskLabelSimple 
+                                        key={index} 
+                                        label={label}/>)
+                                }
+                            </div>
+
                             <label>Description</label>
                             <div>{task.description}</div>
                             <label>Notes</label>
                             <div>{task.notes}</div>
+                            
                         </>
                 }
             </section>

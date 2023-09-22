@@ -10,7 +10,7 @@ export const projectsSlice = createSlice({
     reducers: {
         setProjects: (state, action) => action.payload,
         addProject: (state, action) => {
-            state.push(action.payload);
+            return [...action.payload, state];
         }, 
         deleteProject: (state, action) => {
             return state.filter(element => element.id !== action.payload.id);
