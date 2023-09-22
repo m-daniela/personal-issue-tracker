@@ -9,6 +9,7 @@ import { TaskLabelSimple } from "./TaskLabels";
 import Link from "next/link";
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
+import { useTaskFilterContext } from "../context/TaskFilterProvider";
 
 /**
  * Display the task in a card
@@ -23,6 +24,8 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
         isError: false
     });
     const task = useSelector(getTaskById(taskId));
+    const {query} = useTaskFilterContext();
+    
     const dispatch = useDispatch();
 
     const {attributes, listeners, setNodeRef, transform, transition, isDragging} = useSortable({
@@ -33,6 +36,25 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
             categoryId
         }
     });
+
+    // check if the task has the label in the filter
+    // if not, return null so no task is displayed
+    if (query.labels?.length > 0){
+        for (let queryLabel of query.labels) {
+            if (!task.labels.find(label => label === queryLabel)){
+                return null;
+            }
+        }
+    }
+
+    // check if the task title contains the strin in
+    // the filter
+    // if not, return null so no task is displayed
+    if (query.query){
+        if (!task.name.includes(query.query)){
+            return null;
+        }
+    }
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -62,6 +84,7 @@ const TaskPreview = ({projectId, categoryId, taskId}) => {
             dispatch(deleteTaskFromCategory({categoryId, taskId: removedTask.id}));
         }
     };
+
 
     if (isDragging){
         return (<div className="tasks task-preview dragging"

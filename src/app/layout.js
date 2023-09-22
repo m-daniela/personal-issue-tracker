@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import StoreProvider from "@/redux/StoreProvider";
 import SelectedProjectProvider from "@/components/context/SelectedProjectProvider";
+import TaskFilterProvider from "@/components/context/TaskFilterProvider";
 import { setProjects } from "@/redux/features/projectsSlice";
 import ProjectsPreloader from "@/components/preloaders/ProjectsPreloader";
 import { store } from "@/redux/store";
@@ -40,11 +41,13 @@ export default async function RootLayout({ children }) {
         <html lang="en">
             <body className={inter.className}>
                 <SelectedProjectProvider>
-                    <StoreProvider>
-                        <ProjectsPreloader data={projects}/>
-                        <Navbar />
-                        <main>{children}</main>
-                    </StoreProvider>
+                    <TaskFilterProvider>
+                        <StoreProvider>
+                            <ProjectsPreloader data={projects}/>
+                            <Navbar />
+                            <main>{children}</main>
+                        </StoreProvider>
+                    </TaskFilterProvider>
                 </SelectedProjectProvider>
             </body>
         </html>
