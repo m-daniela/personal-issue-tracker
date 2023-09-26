@@ -18,7 +18,7 @@ import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { createPortal } from "react-dom";
 import TaskPreview from "../tasks/TaskPreview";
-import { apiUpdateProject, apiUpdateTaskAndCategory } from "../utils/apiCalls";
+import { apiUpdateProject, apiUpdateTaskAndCategory } from "../../utils/apiCalls";
 
 
 /**

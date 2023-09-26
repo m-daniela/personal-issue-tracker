@@ -9,12 +9,15 @@ const Navbar = () => {
     const {selectedProject} = useSelectedProjectContext();
     return (
         <nav>
-            <Link href={routes.mainPage}>Home</Link>
-            {
-                selectedProject
+            <span>
+                <Link href={routes.mainPage}>Home</Link>
+                {
+                    selectedProject
                 && 
                 <Link href={routes.projectRoute(selectedProject.id)}>{selectedProject.name}</Link>
-            }
+                }
+            </span>
+            <Link href={routes.apiPage}>API Reference</Link>
         </nav>
     );
 };
