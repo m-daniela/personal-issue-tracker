@@ -25,6 +25,7 @@ export const apiUrls = {
 
 export const routes = {
     mainPage: "/",
+    apiPage: "/docs",
     projectsRoute: "/projects",
     projectRoute: (projectId) => `/projects/${projectId}`,
     taskRoute: (projectId, categoryId, taskId) => `/projects/${projectId}` +
