@@ -25,23 +25,26 @@
 The data is saved in a Firebase database and has the following format:
 
 ```
-projects
-    id
-        created_at
-        updated_at
-        name
-        categories
-            id
-                name
-                order_no
-                tasks
-                    id
-                        created_at
-                        updated_at
-                        name
-                        description
-                        notes
-                        labels
+projects: collection
+    id: string
+        created_at: timestamp
+        updated_at: timestamp
+        name: string
+        category_order: string[]
+        categories: collection
+            id: string
+                created_at: timestamp
+                updated_at: timestamp
+                name: string
+                tasks: string[]
+                tasks: collection
+                    id: string
+                        created_at: timestamp
+                        updated_at: timestamp
+                        name: string
+                        description: string
+                        notes: string
+                        labels: string[]
 ```
 
 # Available queries
